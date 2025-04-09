@@ -2,7 +2,7 @@ const game = {
     player: {
         health: 100,
         strength: 5,
-        inventory: [],
+        inventory: ['кирпич', 'бутылка'], // Начальный инвентарь
         reputation: 0,
         tugriks: 0,
         quests: {},
@@ -50,8 +50,45 @@ const game = {
     init() {
         this.loadGame();
         if (!this.currentLocation) this.currentLocation = this.locations[0];
-        this.updateWeatherAndTime();
-        this.updateGame();
+
+        // Проверяем, завершена ли игра
+        if (this.isGameOver()) {
+            this.showGameOverState();
+        } else {
+            this.updateWeatherAndTime();
+            this.updateGame();
+        }
+    },
+
+    isGameOver() {
+        return (
+            this.player.health <= 0 ||
+            this.player.tugriks >= 1000 ||
+            this.player.reputation >= 100 ||
+            (this.player.is_addicted && this.player.has_hiv && this.player.health < 20)
+        );
+    },
+
+    showGameOverState() {
+        let text = `Вы находитесь: ${this.currentLocation.name}\n${this.currentLocation.description}\n`;
+        if (this.player.health <= 0) {
+            if (this.player.is_addicted) {
+                text += "Ты нашёл грязный шприц на улице, ширнулся и умер от заражения крови. Конец игры.";
+            } else {
+                text += "Ты сгнил в питерских помойках. Конец игры.";
+            }
+        } else if (this.player.tugriks >= 1000) {
+            text += "Ты набрал 1000 тугриков! Снял хату, нашёл работу и выбрался из этого дерьма. Победа!";
+        } else if (this.player.reputation >= 100) {
+            text += "Ты стал королём помойки! Все уважают тебя, даже скинхеды. Победа!";
+        } else if (this.player.is_addicted && this.player.has_hiv && this.player.health < 20) {
+            text += "Ты сгнил в подвале, но стал легендой среди нариков. Конец игры.";
+        }
+
+        this.output.innerText = text;
+        document.getElementById("actions").style.display = "none";
+        document.getElementById("restart-btn").style.display = "inline-block";
+        this.updateStatus();
     },
 
     restart() {
@@ -59,7 +96,7 @@ const game = {
         this.player = {
             health: 100,
             strength: 5,
-            inventory: [],
+            inventory: ['кирпич', 'бутылка'], // Начальный инвентарь
             reputation: 0,
             tugriks: 0,
             quests: {},
@@ -161,30 +198,9 @@ const game = {
             text += "\nТы стал зависимым от фентанила и заразился ВИЧ! -20 HP";
         }
 
-        if (this.player.health <= 0) {
-            if (this.player.is_addicted) {
-                text += "\nТы нашёл грязный шприц на улице, ширнулся и умер от заражения крови. Конец игры.";
-            } else {
-                text += "\nТы сгнил в питерских помойках. Конец игры.";
-            }
-            document.getElementById("actions").style.display = "none";
-            document.getElementById("restart-btn").style.display = "inline-block";
-            clearInterval(this.player.addictionTimer);
-        } else if (this.player.tugriks >= 1000) {
-            text += "\nТы набрал 1000 тугриков! Снял хату, нашёл работу и выбрался из этого дерьма. Победа!";
-            document.getElementById("actions").style.display = "none";
-            document.getElementById("restart-btn").style.display = "inline-block";
-            clearInterval(this.player.addictionTimer);
-        } else if (this.player.reputation >= 100) {
-            text += "\nТы стал королём помойки! Все уважают тебя, даже скинхеды. Победа!";
-            document.getElementById("actions").style.display = "none";
-            document.getElementById("restart-btn").style.display = "inline-block";
-            clearInterval(this.player.addictionTimer);
-        } else if (this.player.is_addicted && this.player.has_hiv && this.player.health < 20) {
-            text += "\nТы сгнил в подвале, но стал легендой среди нариков. Конец игры.";
-            document.getElementById("actions").style.display = "none";
-            document.getElementById("restart-btn").style.display = "inline-block";
-            clearInterval(this.player.addictionTimer);
+        if (this.isGameOver()) {
+            this.showGameOverState();
+            return;
         }
 
         this.output.innerText = text;
@@ -411,7 +427,7 @@ const game = {
     uniqueLocationAction() {
         let action = this.currentLocation.unique_action;
         if (action === "разбить окно" && this.currentLocation.name === "Контейнер у 'Пятёрочки'") {
-            if (this.player.inventory.includes("битый кирпич")) {
+            if (this.player.inventory.includes("битый кирпич") || this.player.inventory.includes("кирпич")) {
                 this.player.inventory.push("чекушка 'Беленькой'");
                 return "Разъебал окно 'Пятёрочки' и спиздил чекушку!";
             }
@@ -482,7 +498,7 @@ const game = {
         if (item === "банка тушёнки") {
             this.player.health += 15;
             text = "Сожрал тушёнку! +15 HP";
-        } else if (item === "полупустая бутылка 'Балтики'" || item === "полная бутылка 'Балтики'") {
+        } else if (item === "полупустая бутылка 'Балтики'" || item === "полная бутылка 'Балтики'" || item === "бутылка") {
             this.player.is_drunk = true;
             text = "Выжрал 'Балтику'. Скоро пиздец!";
             setTimeout(() => {
@@ -501,7 +517,7 @@ const game = {
         } else if (item === "ключ от квартиры") {
             this.currentLocation = this.locations.find(loc => loc.name === "Заброшенная квартира");
             text = "Открыл хату...";
-        } else if (item === "битый кирпич" && this.currentLocation.name === "Контейнер у 'Пятёрочки'") {
+        } else if ((item === "битый кирпич" || item === "кирпич") && this.currentLocation.name === "Контейнер у 'Пятёрочки'") {
             this.player.inventory.push("чекушка 'Беленькой'");
             text = "Разъебал окно 'Пятёрочки' и спиздил чекушку!";
         } else if (item === "доза фентанила" && this.player.is_addicted) {
@@ -582,8 +598,8 @@ const game = {
                 text += "Даня: 'Делай, что взял уже!'";
             }
         } else if (action === "дать бухло") {
-            if (this.player.inventory.includes("полупустая бутылка 'Балтики'")) {
-                this.player.inventory.splice(this.player.inventory.indexOf("полупустая бутылка 'Балтики'"), 1);
+            if (this.player.inventory.includes("полупустая бутылка 'Балтики'") || this.player.inventory.includes("бутылка")) {
+                this.player.inventory.splice(this.player.inventory.indexOf(this.player.inventory.includes("полупустая бутылка 'Балтики'") ? "полупустая бутылка 'Балтики'" : "бутылка"), 1);
                 this.player.reputation += 30;
                 text += "Даня глушит 'Балтику': 'В рехабе я...' *блюёт*";
             } else {
