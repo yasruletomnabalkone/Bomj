@@ -46,12 +46,17 @@ const game = {
     currentLocation: null,
     output: document.getElementById("output"),
     danyaOptions: document.getElementById("danya-options"),
+    windowBroken: false, // Новый флаг для отслеживания разбитого окна
+    garageRobbed: false, // Флаг для гаражей
+    catFed: false, // Флаг для кота
+    stashSearched: false, // Флаг для тайника
+    ratCaught: false, // Флаг для крысы
+    intercomUsed: false, // Флаг для домофона
 
     init() {
         this.loadGame();
         if (!this.currentLocation) this.currentLocation = this.locations[0];
-        // Вступление с сюжетом
-        this.output.innerText = "Ты — Вася, бывший работяга. Уволили за пьянку, жена выгнала, друзья слились. Теперь ты бомж у 'Пятёрочки'. Цель: накопить 1000 тугриков, чтобы снять хату, или стать королём помойки с репутацией 100. Не сдохни — Питер не прощает.";
+        this.output.innerText = "Ты — Вася, бывший работяга. Уволили за пьянку, жена выгнала, друзья слились. Теперь ты бомж у 'Пятёрочки'. Цель: 1000 тугриков или репутация 100. Не сдохни.";
         if (this.isGameOver()) {
             this.showGameOverState();
         } else {
@@ -99,6 +104,12 @@ const game = {
         this.currentLocation = this.locations[0];
         this.weather = "ясно";
         this.timeOfDay = "день";
+        this.windowBroken = false; // Сбрасываем флаг
+        this.garageRobbed = false;
+        this.catFed = false;
+        this.stashSearched = false;
+        this.ratCaught = false;
+        this.intercomUsed = false;
         localStorage.removeItem("gameState");
         if (this.player.addictionTimer) clearInterval(this.player.addictionTimer);
         this.output.innerText = "Ты — Вася, бывший работяга. Уволили за пьянку, жена выгнала, друзья слились. Теперь ты бомж у 'Пятёрочки'. Цель: 1000 тугриков или репутация 100. Не сдохни.";
@@ -115,7 +126,13 @@ const game = {
             player: this.player,
             currentLocation: this.currentLocation,
             weather: this.weather,
-            timeOfDay: this.timeOfDay
+            timeOfDay: this.timeOfDay,
+            windowBroken: this.windowBroken,
+            garageRobbed: this.garageRobbed,
+            catFed: this.catFed,
+            stashSearched: this.stashSearched,
+            ratCaught: this.ratCaught,
+            intercomUsed: this.intercomUsed
         }));
     },
 
@@ -127,6 +144,12 @@ const game = {
             this.currentLocation = state.currentLocation;
             this.weather = state.weather;
             this.timeOfDay = state.timeOfDay;
+            this.windowBroken = state.windowBroken || false;
+            this.garageRobbed = state.garageRobbed || false;
+            this.catFed = state.catFed || false;
+            this.stashSearched = state.stashSearched || false;
+            this.ratCaught = state.ratCaught || false;
+            this.intercomUsed = state.intercomUsed || false;
         }
     },
 
@@ -193,12 +216,11 @@ const game = {
         if (Math.random() > 0.9) {
             this.randomEvent();
         }
-        if (Math.random() > 0.8) { // 20% шанс дать совет
+        if (Math.random() > 0.8) {
             this.giveHint();
         }
     },
 
-    // Новая функция для советов
     giveHint() {
         const hints = [
             "Ищи еду вроде тушёнки или супа, чтобы не сдохнуть от голода.",
@@ -320,7 +342,6 @@ const game = {
             addOutput(`Гопник: 'Молодец! Вот ${reward} тугриков.'`);
         } else {
             let damage = Math.floor(Math.random() * 7) + 3;
-            this.player.health -= damage;
             addOutput(`Гопник бьёт в рыло. -${damage} HP`);
         }
         this.updateGame();
@@ -329,26 +350,33 @@ const game = {
     tradeOpportunity() {
         let discount = this.player.reputation > 50 ? 10 : 0;
         let text = `Барыга: 'Бери шмот!'\n`;
-        text += `1 — Балтика (${50 - discount} тугриков), 2 — Доза (${70 - discount} тугриков), 3 — Мобильник (${100 - discount} тугриков), 4 — Отказаться`;
         addOutput(text);
-        let choice = prompt("Что берёшь? (1-4):");
+        
+        const options = [
+            { label: `Балтика (${50 - discount} тугриков)`, value: "1" },
+            { label: `Доза (${70 - discount} тугриков)`, value: "2" },
+            { label: `Мобильник (${100 - discount} тугриков)`, value: "3" },
+            { label: "Отказаться", value: "4" }
+        ];
 
-        if (choice === "1" && this.player.tugriks >= (50 - discount)) {
-            this.player.tugriks -= (50 - discount);
-            this.player.inventory.push("полная бутылка 'Балтики'");
-            addOutput(`Купил 'Балтику' за ${50 - discount} тугриков!`);
-        } else if (choice === "2" && this.player.tugriks >= (70 - discount)) {
-            this.player.tugriks -= (70 - discount);
-            this.player.inventory.push("доза фентанила");
-            addOutput(`Купил дозу за ${70 - discount} тугриков!`);
-        } else if (choice === "3" && this.player.tugriks >= (100 - discount)) {
-            this.player.tugriks -= (100 - discount);
-            this.player.inventory.push("мобильник без симки");
-            addOutput(`Купил мобильник за ${100 - discount} тугриков!`);
-        } else {
-            addOutput("Барыга ушёл.");
-        }
-        this.updateGame();
+        showTradePrompt(options, (choice) => {
+            if (choice === "1" && this.player.tugriks >= (50 - discount)) {
+                this.player.tugriks -= (50 - discount);
+                this.player.inventory.push("полная бутылка 'Балтики'");
+                addOutput(`Купил 'Балтику' за ${50 - discount} тугриков!`);
+            } else if (choice === "2" && this.player.tugriks >= (70 - discount)) {
+                this.player.tugriks -= (70 - discount);
+                this.player.inventory.push("доза фентанила");
+                addOutput(`Купил дозу за ${70 - discount} тугриков!`);
+            } else if (choice === "3" && this.player.tugriks >= (100 - discount)) {
+                this.player.tugriks -= (100 - discount);
+                this.player.inventory.push("мобильник без симки");
+                addOutput(`Купил мобильник за ${100 - discount} тугриков!`);
+            } else {
+                addOutput("Барыга ушёл.");
+            }
+            this.updateGame();
+        });
     },
 
     randomEvent() {
@@ -422,29 +450,50 @@ const game = {
     uniqueLocationAction() {
         let action = this.currentLocation.unique_action;
         if (action === "разбить окно" && this.currentLocation.name === "Контейнер у 'Пятёрочки'") {
+            if (this.windowBroken) {
+                return "Окно уже разбито, больше ничего нет.";
+            }
             if (this.player.inventory.includes("битый кирпич") || this.player.inventory.includes("кирпич")) {
+                this.windowBroken = true;
+                const brickType = this.player.inventory.includes("битый кирпич") ? "битый кирпич" : "кирпич";
+                this.player.inventory.splice(this.player.inventory.indexOf(brickType), 1); // Удаляем кирпич
                 this.player.inventory.push("чекушка 'Беленькой'");
-                return "Разбил окно и спиздил чекушку!";
+                this.player.health -= 5; // Урон от стекла
+                return "Разбил окно и спиздил чекушку! Порезался стеклом. -5 HP";
             }
             return "Нечем бить.";
         } else if (action === "спиздить бензин" && this.currentLocation.name === "Гаражи за домом") {
+            if (this.garageRobbed) {
+                return "Ты уже спиздил всё, что можно.";
+            }
             if (Math.random() > 0.5) {
+                this.garageRobbed = true;
                 this.player.inventory.push("канистра бензина");
-                return "Спиздил бензин!";
+                this.player.reputation -= 5; // Репутация падает за воровство
+                return "Спиздил бензин! Репутация -5.";
             }
             return this.fight("скинхеды");
         } else if (action === "покормить кота" && this.currentLocation.name === "Помойка у парадной") {
+            if (this.catFed) {
+                return "Кот уже наелся, больше не хочет.";
+            }
             if (this.player.inventory.includes("банка тушёнки")) {
+                this.catFed = true;
                 this.player.inventory.splice(this.player.inventory.indexOf("банка тушёнки"), 1);
                 this.player.reputation += 20;
                 return "Покормил кота. +20 репутации.";
             }
             return "Нет тушёнки.";
         } else if (action === "обыскать тайник" && this.currentLocation.name === "Заброшенная квартира") {
+            if (this.stashSearched) {
+                return "Ты уже обыскал тайник, больше ничего нет.";
+            }
             if (Math.random() > 0.5) {
+                this.stashSearched = true;
                 this.player.tugriks += 70;
                 return "Нашёл тайник! +70 тугриков.";
             }
+            this.stashSearched = true;
             return "Тайник пустой.";
         } else if (action === "продать шмот" && this.currentLocation.name === "Ломбард") {
             let item = prompt("Что продать?");
@@ -456,17 +505,27 @@ const game = {
             }
             return "Нет такого.";
         } else if (action === "поймать крысу" && this.currentLocation.name === "Подвал") {
+            if (this.ratCaught) {
+                return "Ты уже поймал крысу, больше тут некого ловить.";
+            }
             if (Math.random() > 0.5) {
+                this.ratCaught = true;
                 this.player.inventory.push("дохлая крыса");
                 return "Поймал крысу!";
             }
+            this.ratCaught = true;
             this.player.health -= 3;
             return "Крыса укусила. -3 HP";
         } else if (action === "позвонить в домофон" && this.currentLocation.name === "Парадная") {
+            if (this.intercomUsed) {
+                return "Ты уже звонил, больше никто не откроет.";
+            }
             if (Math.random() > 0.7) {
+                this.intercomUsed = true;
                 this.player.tugriks += 20;
                 return "Кинули 20 тугриков!";
             }
+            this.intercomUsed = true;
             return "Обматерили.";
         }
         return "Нечего делать.";
@@ -514,8 +573,16 @@ const game = {
             this.currentLocation = this.locations.find(loc => loc.name === "Заброшенная квартира");
             text = "Открыл хату...";
         } else if ((item === "битый кирпич" || item === "кирпич") && this.currentLocation.name === "Контейнер у 'Пятёрочки'") {
-            this.player.inventory.push("чекушка 'Беленькой'");
-            text = "Разбил окно и спиздил чекушку!";
+            if (this.windowBroken) {
+                text = "Окно уже разбито.";
+            } else {
+                this.windowBroken = true;
+                const brickType = this.player.inventory.includes("битый кирпич") ? "битый кирпич" : "кирпич";
+                this.player.inventory.splice(this.player.inventory.indexOf(brickType), 1);
+                this.player.inventory.push("чекушка 'Беленькой'");
+                this.player.health -= 5;
+                text = "Разбил окно и спиздил чекушку! Порезался стеклом. -5 HP";
+            }
         } else if (item === "доза фентанила" && this.player.is_addicted) {
             this.player.health += 15;
             text = "Ширнулся. Ломка ушла! +15 HP";
@@ -731,6 +798,25 @@ function hideCombinePrompt() {
 
 function hideSearchMiniGame() {
     document.getElementById("search-mini-game").style.display = "none";
+}
+
+function showTradePrompt(options, callback) {
+    const container = document.getElementById("trade-options");
+    container.innerHTML = '';
+    options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.innerText = opt.label;
+        btn.onclick = () => {
+            callback(opt.value);
+            hideTradePrompt();
+        };
+        container.appendChild(btn);
+    });
+    document.getElementById("trade-prompt").style.display = "flex";
+}
+
+function hideTradePrompt() {
+    document.getElementById("trade-prompt").style.display = "none";
 }
 
 game.init();
