@@ -3,30 +3,26 @@ const game = {
         health: 100,
         inventory: [],
         reputation: 0,
+        tugriks: 0,
         quests: {},
         is_addicted: false,
         has_hiv: false,
         is_drunk: false,
-        tugriks: 0,
         addictionTimer: null
     },
 
     locations: [
-        { name: "Контейнер у 'Пятёрочки'", description: "Воняет тухлым борщом и надеждой. В углу ржавеет детская коляска.", items: ["полупустая бутылка 'Балтики'", "доширак", "ключ от квартиры", "битый кирпич"], danger_level: 2, events: ["Пьяный грузчик спит", "Кот шипит из угла"] },
-        { name: "Гаражи за домом", description: "Темно, пахнет бензином и страхом. Здесь точно прячутся скинхеды.", items: ["чекушка 'Беленькой'", "ящик 'Жигулевского'", "ржавый гвоздь"], danger_level: 7, events: ["Скинхеды пьют в углу", "Собака лает"] },
-        { name: "Помойка у парадной", description: "Аристократическая помойка: битые фарфоровые чашки и шампанское.", items: ["банка тушёнки", "бабушкин суп", "кольцо с фианитом"], danger_level: 3, events: ["Бабка выносит мусор", "Гопник курит"] },
-        { name: "Квартира", description: "Заброшенная хата с ободранными обоями и запахом фентанила.", items: ["грязный шприц", "доза фентанила", "пустая пачка сигарет"], danger_level: 10, events: ["Наркоман блюёт", "Таракан ползёт"] },
-        { name: "Ломбард", description: "Тёмный закуток с мутным типом за стойкой. Пахнет шмотками.", items: ["ржавый гвоздь", "пустая пачка сигарет"], danger_level: 4, events: ["Тип смотрит криво", "Муха жужжит"] }
+        { name: "Контейнер у 'Пятёрочки'", description: "Воняет тухлым борщом и надеждой. В углу ржавеет детская коляска.", items: ["полупустая бутылка 'Балтики'", "доширак", "ключ от квартиры", "битый кирпич"], danger_level: 2 },
+        { name: "Гаражи за домом", description: "Темно, пахнет бензином и страхом. Здесь прячутся скинхеды.", items: ["чекушка 'Беленькой'", "ящик 'Жигулевского'", "ржавый гвоздь"], danger_level: 7 },
+        { name: "Помойка у парадной", description: "Аристократическая помойка: битые чашки и шампанское.", items: ["банка тушёнки", "бабушкин суп", "кольцо с фианитом"], danger_level: 3 },
+        { name: "Заброшенная квартира", description: "Заброшенная хата с ободранными обоями и запахом фентанила.", items: ["грязный шприц", "доза фентанила", "пустая пачка сигарет"], danger_level: 10 },
+        { name: "Ломбард", description: "Тёмный закуток с мутным типом за стойкой.", items: ["ржавый гвоздь", "пустая пачка сигарет"], danger_level: 4 },
+        { name: "Подвал", description: "Сырой подвал с крысами и шмотками.", items: ["старая куртка", "крысиный яд", "10 тугриков"], danger_level: 5 }
     ],
-
-    currentLocation: null,
-    output: document.getElementById("output"),
-    danyaOptions: document.getElementById("danya-options"),
-    danyaActive: false,
 
     riddles: [
         {
-            question: "Есть два стула - на одном пики точёные, на другом хуи дрочённые, на какой сам сядешь, на какой мать посадишь?",
+            question: "Есть два стула — на одном пики точёные, на другом хуи дрочённые, на какой сам сядешь, на какой мать посадишь?",
             options: [
                 "Сяду на пики, мать на хуи.",
                 "Сяду на хуи, мать на пики.",
@@ -37,6 +33,11 @@ const game = {
         }
     ],
 
+    currentLocation: null,
+    output: document.getElementById("output"),
+    danyaOptions: document.getElementById("danya-options"),
+    danyaActive: false,
+
     init() {
         this.currentLocation = this.locations[0];
         this.updateGame();
@@ -45,7 +46,7 @@ const game = {
     updateStatus() {
         let status = `♥ Здоровье: ${this.player.health} | 🎭 Репутация: ${this.player.reputation} | 💰 Тугрики: ${this.player.tugriks}\n`;
         status += `🎒 Инвентарь: ${this.player.inventory.length > 0 ? this.player.inventory.join(", ") : "пусто"}\n`;
-        if (this.player.quests) status += `📜 Квесты: ${Object.keys(this.player.quests).join(", ")}\n`;
+        if (Object.keys(this.player.quests).length > 0) status += `📜 Квесты: ${Object.keys(this.player.quests).join(", ")}\n`;
         if (this.player.is_addicted) status += "💉 Ты зависим от фентанила!\n";
         if (this.player.has_hiv) status += "🩺 У тебя ВИЧ!\n";
         if (this.player.is_drunk) status += "🍺 Ты пьяный!\n";
@@ -54,11 +55,9 @@ const game = {
 
     updateGame() {
         let text = `Вы находитесь: ${this.currentLocation.name}\n${this.currentLocation.description}`;
-        let randomEvent = this.currentLocation.events[Math.floor(Math.random() * this.currentLocation.events.length)];
-        text += `\nСобытие: ${randomEvent}`;
 
-        if (this.currentLocation.name === "Квартира" && !this.player.has_hiv && Math.random() > 0.5) {
-            text += "\nОбдолбанный наркоман втыкает в тебя грязный шприц!";
+        if (this.currentLocation.name === "Заброшенная квартира" && !this.player.has_hiv && Math.random() > 0.5) {
+            text += "\nОбдолбанный нарик втыкает в тебя грязный шприц!";
             this.startAddiction();
             this.player.has_hiv = true;
             this.player.health -= 20;
@@ -67,14 +66,14 @@ const game = {
 
         if (this.player.health <= 0) {
             if (this.player.is_addicted) {
-                text += "\nТы нашёл грязный шприц, ширнулся и умер от заражения крови. Конец игры.";
+                text += "\nТы нашёл грязный шприц на улице, ширнулся и умер от заражения крови. Конец игры.";
             } else {
-                text += "\n💀 Игра окончена. Ты сгнил в питерских помойках...";
+                text += "\nТы сгнил в питерских помойках. Конец игры.";
             }
             document.getElementById("actions").style.display = "none";
             clearInterval(this.player.addictionTimer);
         } else if (this.player.tugriks >= 1000) {
-            text += "\nТы набрал 1000 тугриков! Снял квартиру, нашёл работу и выбрался из бомжатской жизни. Победа!";
+            text += "\nТы набрал 1000 тугриков! Снял хату, нашёл работу и выбрался из этого дерьма. Победа!";
             document.getElementById("actions").style.display = "none";
             clearInterval(this.player.addictionTimer);
         }
@@ -82,7 +81,7 @@ const game = {
         this.output.innerText = text;
         this.updateStatus();
 
-        if (this.player.tugriks >= 50) {
+        if (this.player.tugriks >= 50 && Math.random() > 0.7) {
             this.tradeOpportunity();
         }
     },
@@ -93,7 +92,7 @@ const game = {
             this.player.addictionTimer = setInterval(() => {
                 if (!this.player.inventory.includes("доза фентанила")) {
                     this.player.health -= 5;
-                    this.output.innerText += "\nТы страдаешь от ломки... -5 HP";
+                    this.output.innerText += "\nЛомка бьёт... -5 HP";
                     this.updateGame();
                 }
             }, 10000);
@@ -108,50 +107,30 @@ const game = {
 
         if (parseInt(choice) === winningContainer) {
             let foundItem = this.currentLocation.items[Math.floor(Math.random() * this.currentLocation.items.length)];
-            this.player.inventory.push(foundItem);
-            this.output.innerText += `\nУгадал! Нашёл: ${foundItem}.`;
+            if (foundItem === "10 тугриков") {
+                this.player.tugriks += 10;
+                this.output.innerText += "\nУгадал! Нашёл 10 тугриков.";
+            } else {
+                this.player.inventory.push(foundItem);
+                this.output.innerText += `\nУгадал! Нашёл: ${foundItem}.`;
+            }
             this.checkQuestCompletion(foundItem);
         } else {
             let damage = Math.floor(Math.random() * 10) + 5;
             this.player.health -= damage;
-            this.output.innerText += `\nПусто! Пока копался, кто-то пнул тебя сзади. -${damage} HP`;
-        }
-        this.updateGame();
-    },
-
-    miniGameSteal() {
-        let text = "\nСпящий бомж уронил сумку. Попробуй спиздить (1 — тихо, 2 — быстро): ";
-        this.output.innerText += text;
-        let choice = prompt("Тихо (1) или быстро (2)?");
-        let successChance = this.player.reputation > 20 ? 0.7 : 0.5;
-
-        if (Math.random() < successChance && choice === "1") {
-            let loot = ["доширак", "чекушка 'Беленькой'", "10 тугриков"][Math.floor(Math.random() * 3)];
-            if (loot === "10 тугриков") this.player.tugriks += 10;
-            else this.player.inventory.push(loot);
-            this.output.innerText += `\nТихо спиздил: ${loot}!`;
-            this.checkQuestCompletion(loot);
-        } else if (choice === "2" && Math.random() > 0.3) {
-            let loot = ["битый кирпич", "пустая пачка сигарет"][Math.floor(Math.random() * 2)];
-            this.player.inventory.push(loot);
-            this.output.innerText += `\nСхватил быстро: ${loot}.`;
-        } else {
-            this.player.health -= 15;
-            this.output.innerText += `\nБомж проснулся и втащил тебе! -15 HP`;
+            this.output.innerText += `\nПусто! Пока копался, пьяный бомж пнул тебя. -${damage} HP`;
         }
         this.updateGame();
     },
 
     miniGameRiddle() {
-        let text = "\nПодходит гопник: 'Э, петух, докажи, что не лох! Отгадай загадку:'";
+        let text = "\nГопник: 'Э, петух, докажи, что не лох! Отгадай:'";
         let riddle = this.riddles[Math.floor(Math.random() * this.riddles.length)];
         text += `\n${riddle.question}`;
-        riddle.options.forEach((opt, i) => {
-            text += `\n${i + 1}. ${opt}`;
-        });
+        riddle.options.forEach((opt, i) => text += `\n${i + 1}. ${opt}`);
         this.output.innerText += text;
-        let choice = prompt("Выбери ответ (1-4):");
 
+        let choice = prompt("Выбери ответ (1-4):");
         if (parseInt(choice) - 1 === riddle.correct) {
             let reward = Math.floor(Math.random() * 20) + 10;
             this.player.tugriks += reward;
@@ -159,14 +138,14 @@ const game = {
         } else {
             let damage = Math.floor(Math.random() * 10) + 5;
             this.player.health -= damage;
-            this.output.innerText += `\nГопник: 'Лох ты, петух!' *бьёт в рыло* -${damage} HP`;
+            this.output.innerText += `\nГопник: 'Лох ты!' *бьёт в рыло* -${damage} HP`;
         }
         this.updateGame();
     },
 
     tradeOpportunity() {
-        let text = `\nК тебе подходит барыга: "Есть ${this.player.tugriks} тугриков? Меняю на шмот!"\n`;
         let discount = this.player.reputation > 50 ? 10 : 0;
+        let text = `\nБарыга: 'Есть ${this.player.tugriks} тугриков? Бери шмот!'\n`;
         text += `1 — Балтика (${50 - discount} тугриков), 2 — Доза (${70 - discount} тугриков), 3 — Отказаться`;
         this.output.innerText += text;
         let choice = prompt("Что берёшь? (1, 2, 3):");
@@ -180,7 +159,7 @@ const game = {
             this.player.inventory.push("доза фентанила");
             this.output.innerText += `\nКупил дозу за ${70 - discount} тугриков!`;
         } else if (choice === "3") {
-            this.output.innerText += "\nБарыга ушёл, плюнув тебе под ноги.";
+            this.output.innerText += "\nБарыга плюнул тебе под ноги и ушёл.";
         } else {
             this.output.innerText += "\n'Чё бормочешь?' — барыга уходит.";
         }
@@ -191,21 +170,16 @@ const game = {
         if (this.danyaActive) return;
 
         let text = "";
+        let reputationMod = this.player.reputation < 0 ? 2 : 0;
+
         if (command === "искать") {
             let dangerRoll = Math.random() * 10;
-            let reputationMod = this.player.reputation < 0 ? 2 : 0;
-            if (dangerRoll > this.currentLocation.danger_level + reputationMod) {
-                let miniGame = Math.random();
-                if (miniGame > 0.8) this.miniGameGuessContainer();
-                else if (miniGame > 0.6) this.miniGameSteal();
-                else if (miniGame > 0.4) this.miniGameRiddle();
-                else {
-                    this.player.tugriks += 5;
-                    this.output.innerText += "\nНашёл 5 тугриков в грязи!";
-                    this.updateGame();
-                }
+            if (Math.random() > 0.7) {
+                this.miniGameRiddle();
+            } else if (dangerRoll > this.currentLocation.danger_level + reputationMod) {
+                this.miniGameGuessContainer();
             } else {
-                let attacker = this.currentLocation.name === "Квартира" ? "наркоманы" : ["крысы", "скинхеды", "пьяный дворник"][Math.floor(Math.random() * 3)];
+                let attacker = this.currentLocation.name === "Заброшенная квартира" ? "наркоманы" : ["крысы", "скинхеды", "пьяный дворник"][Math.floor(Math.random() * 3)];
                 if (this.player.inventory.includes("ржавый гвоздь") && (attacker === "скинхеды" || attacker === "наркоманы")) {
                     text += `Ты отбился от ${attacker} ржавым гвоздём!`;
                 } else {
@@ -222,7 +196,8 @@ const game = {
             this.output.innerText += "\n" + text;
             this.updateGame();
         } else if (command === "позвать Даню") {
-            if (Math.random() > 0.3) {
+            let danyaChance = this.player.reputation > 50 ? 0.9 : 0.7;
+            if (Math.random() < danyaChance) {
                 this.danyaActive = true;
                 text += "\nДаня вылез: 'О, кент! Дашь на опохмел?'";
                 this.danyaOptions.style.display = "block";
@@ -258,7 +233,7 @@ const game = {
             this.player.health += 5;
             text = "Сожрал сухой дошик. +5 HP";
         } else if (item === "ключ от квартиры") {
-            this.currentLocation = this.locations.find(loc => loc.name === "Квартира");
+            this.currentLocation = this.locations.find(loc => loc.name === "Заброшенная квартира");
             text = "Открыл хату...";
         } else if (item === "битый кирпич" && this.currentLocation.name === "Контейнер у 'Пятёрочки'") {
             this.player.inventory.push("чекушка 'Беленькой'");
@@ -282,6 +257,12 @@ const game = {
             this.player.inventory.splice(this.player.inventory.indexOf("доза фентанила"), 1);
             this.player.inventory.push("пачка с фентанилом");
             text = "Спрятал дозу в пачку.";
+        } else if (item === "старая куртка") {
+            this.player.reputation += 10;
+            text = "Натянул куртку. Выглядишь чуть лучше! +10 репутации";
+        } else if (item === "крысиный яд") {
+            this.player.health -= 10;
+            text = "Случайно вдохнул крысиный яд. -10 HP";
         } else {
             text = "Не сюда и не так.";
             this.output.innerText += "\n" + text;
