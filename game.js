@@ -78,16 +78,32 @@ const game = {
                 text += "Ты сгнил в питерских помойках. Конец игры.";
             }
         } else if (this.player.tugriks >= 1000) {
-        text += "Ты набрал 1000 тугриков! Снял хату, нашёл работу и выбрался из этого дерьма. Победа!";
+            text += "Ты набрал 1000 тугриков! Снял хату, нашёл работу и выбрался из этого дерьма. Победа!";
         } else if (this.player.reputation >= 100) {
             text += "Ты стал королём помойки! Все уважают тебя, даже скинхеды. Победа!";
         } else if (this.player.is_addicted && this.player.has_hiv && this.player.health < 20) {
             text += "Ты сгнил в подвале, но стал легендой среди нариков. Конец игры.";
+        } else {
+            text += "Игра окончена по неизвестной причине.";
         }
 
         this.output.innerText = text;
-        document.getElementById("actions").style.display = "none";
-        document.getElementById("restart-btn").style.display = "inline-block";
+        const actionsDiv = document.getElementById("actions");
+        const restartBtn = document.getElementById("restart-btn");
+
+        if (actionsDiv) {
+            actionsDiv.style.display = "none";
+        } else {
+            console.error("Элемент #actions не найден!");
+        }
+
+        if (restartBtn) {
+            restartBtn.style.display = "inline-block";
+            console.log("Кнопка 'Перезапустить' должна быть видна");
+        } else {
+            console.error("Элемент #restart-btn не найден!");
+        }
+
         this.updateStatus();
     },
 
