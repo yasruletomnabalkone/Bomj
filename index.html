@@ -2,32 +2,42 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Питерский Мусорный Квест</title>
+    <title>Питерский мусорный квест</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div id="game-container">
-        <h1>Питерский Мусорный Квест</h1>
-        <div id="output">
-            ░█▀▀░█▀█░█▀▄░▀█▀░█▀▀░░░█▀█░█░█░█▀▀░█▀▄░█▀█░█▀▄<br>
-            ░█▀▀░█░█░█▀▄░░█░░█▀▀░░░█▀▀░░█░░█▀▀░█▀▄░█░█░█░█<br>
-            ░▀▀▀░▀░▀░▀░▀░░▀░░▀▀▀░░░▀░░░░▀░░▀▀▀░▀░▀░▀▀▀░▀▀░<br>
-            Добро пожаловать в мусорные глубины Санкт-Петербурга! 🗑️🏙️<br>
+        <h1>Питерский мусорный квест</h1>
+        <div id="output" class="game-text">
+            Добро пожаловать в мусорные глубины Санкт-Петербурга! 🏙️🗑️<br>
             Ваша цель — выжить в этом аду.
         </div>
-        <div id="status"></div>
-        <div id="actions">
-            <button onclick="game.action('искать')">Искать</button>
-            <button onclick="game.action('уйти')">Уйти</button>
-            <button onclick="game.action('позвать Даню')">Позвать Даню</button>
-            <button onclick="showUseItemPrompt()">Использовать предмет</button>
+        <div id="status" class="status-panel"></div>
+        <div id="actions" class="action-buttons">
+            <button onclick="game.action('искать')">🔍 Обыскать место</button>
+            <button onclick="showLocationMenu()">🚶 Пойти в другое место</button>
+            <button onclick="game.action('позвать Даню')">👨‍🎤 Позвать Даню</button>
+            <button onclick="showUseItemPrompt()">🎒 Использовать предмет</button>
         </div>
-        <div id="danya-options" style="display: none;">
-            <button onclick="game.danyaAction('поговорить')">Поговорить</button>
-            <button onclick="game.danyaAction('дать бухло')">Дать бухло</button>
-            <button onclick="game.danyaAction('уйти')">Уйти</button>
+        <div id="danya-options" class="danya-buttons" style="display: none;">
+            <button onclick="game.danyaAction('поговорить')">💬 Поговорить</button>
+            <button onclick="game.danyaAction('дать бухло')">🍺 Дать бухло</button>
+            <button onclick="game.danyaAction('уйти')">👋 Уйти</button>
         </div>
     </div>
     <script src="game.js"></script>
+    <script>
+        function showLocationMenu() {
+            let locations = game.locations.map(loc => loc.name);
+            let chosen = prompt(`Куда идем?\n${locations.join("\n")}`);
+            if (chosen) {
+                let loc = game.locations.find(l => l.name === chosen);
+                if (loc) {
+                    game.currentLocation = loc;
+                    game.updateGame();
+                }
+            }
+        }
+    </script>
 </body>
 </html>
