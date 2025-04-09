@@ -1,5 +1,5 @@
 body {
-    background-color: #222;
+    background: radial-gradient(ellipse at center, #222 0%, #111 100%);
     color: #fff;
     font-family: monospace;
     text-align: center;
@@ -8,51 +8,54 @@ body {
 }
 
 #game-container {
-    max-width: 800px;
+    max-width: 900px;
     margin: 0 auto;
     padding: 20px;
-    background-color: #333;
+    background-color: #2e2e2e;
     border: 2px solid #666;
-    animation: fadeIn 1s ease-in;
+    border-radius: 12px;
+    box-shadow: 0 0 20px #0ff8;
 }
 
 h1 {
-    font-size: 24px;
+    font-size: 26px;
     margin-bottom: 20px;
+    color: #0ff;
+    text-shadow: 0 0 5px #0ff;
 }
 
 #output, #status {
     margin-bottom: 20px;
     text-align: left;
     white-space: pre-wrap;
-    max-height: 200px;
+    background-color: #1a1a1a;
+    padding: 15px;
+    border-radius: 8px;
+    min-height: 150px;
     overflow-y: auto;
-    border: 1px solid #555;
-    padding: 10px;
-    background-color: #222;
-    animation: slideDown 0.5s ease-in;
+    box-shadow: inset 0 0 10px #000;
 }
 
 button {
-    padding: 8px 16px;
+    padding: 10px 20px;
     margin: 5px;
-    background-color: #666;
+    background-color: #444;
     color: #fff;
-    border: none;
+    border: 1px solid #666;
+    border-radius: 6px;
     cursor: pointer;
     font-family: monospace;
-    border-radius: 6px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    transition: all 0.2s ease;
 }
 
 button:hover {
-    background-color: #888;
+    background-color: #666;
     transform: scale(1.05);
+    box-shadow: 0 0 5px #0ff;
 }
 
 #actions, #danya-options {
     margin-top: 20px;
-    animation: fadeIn 1s ease-in;
 }
 
 .modal {
@@ -61,34 +64,35 @@ button:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0.8);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
-    animation: fadeIn 0.3s ease-out;
 }
 
 .modal-content {
-    background-color: #444;
-    padding: 20px;
-    border-radius: 8px;
+    background-color: #333;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px #0ff;
     text-align: center;
-    box-shadow: 0 0 10px #000;
-    animation: popIn 0.3s ease-in-out;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+.quest-log {
+    text-align: left;
+    background-color: #1c1c1c;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+    box-shadow: inset 0 0 10px #000;
 }
 
-@keyframes popIn {
-    0% { transform: scale(0.8); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
+.quest-log h3 {
+    color: #0ff;
+    margin-top: 0;
 }
 
-@keyframes slideDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+.quest-log ul {
+    padding-left: 20px;
 }
