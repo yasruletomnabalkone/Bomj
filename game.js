@@ -54,6 +54,42 @@ const game = {
         this.updateGame();
     },
 
+    restart() {
+        // Сбрасываем состояние игрока
+        this.player = {
+            health: 100,
+            strength: 5,
+            inventory: [],
+            reputation: 0,
+            tugriks: 0,
+            quests: {},
+            is_addicted: false,
+            has_hiv: false,
+            is_drunk: false,
+            addictionTimer: null
+        };
+        this.currentLocation = this.locations[0];
+        this.weather = "ясно";
+        this.timeOfDay = "день";
+        
+        // Очищаем localStorage
+        localStorage.removeItem("gameState");
+
+        // Очищаем таймеры
+        if (this.player.addictionTimer) clearInterval(this.player.addictionTimer);
+
+        // Сбрасываем интерфейс
+        this.output.innerText = "Добро пожаловать в мусорные глубины Санкт-Петербурга! 🗑️🏙️\nВаша цель — выжить в этом аду.";
+        document.getElementById("actions").style.display = "flex";
+        document.getElementById("restart-btn").style.display = "none";
+        this.danyaOptions.style.display = "none";
+        document.body.className = ""; // Сбрасываем эффекты погоды
+
+        // Перезапускаем игру
+        this.updateWeatherAndTime();
+        this.updateGame();
+    },
+
     saveGame() {
         localStorage.setItem("gameState", JSON.stringify({
             player: this.player,
@@ -80,7 +116,7 @@ const game = {
         if (Math.random() > 0.7) this.weather = weathers[Math.floor(Math.random() * weathers.length)];
         if (Math.random() > 0.5) this.timeOfDay = times[Math.floor(Math.random() * times.length)];
         
-        document.body.className = ""; // Сбрасываем классы
+        document.body.className = "";
         if (this.weather === "дождь") document.body.classList.add("rain");
         if (this.weather === "снег") document.body.classList.add("snow");
         if (this.timeOfDay === "ночь") document.body.classList.add("night");
@@ -132,18 +168,22 @@ const game = {
                 text += "\nТы сгнил в питерских помойках. Конец игры.";
             }
             document.getElementById("actions").style.display = "none";
+            document.getElementById("restart-btn").style.display = "inline-block";
             clearInterval(this.player.addictionTimer);
         } else if (this.player.tugriks >= 1000) {
             text += "\nТы набрал 1000 тугриков! Снял хату, нашёл работу и выбрался из этого дерьма. Победа!";
             document.getElementById("actions").style.display = "none";
+            document.getElementById("restart-btn").style.display = "inline-block";
             clearInterval(this.player.addictionTimer);
         } else if (this.player.reputation >= 100) {
             text += "\nТы стал королём помойки! Все уважают тебя, даже скинхеды. Победа!";
             document.getElementById("actions").style.display = "none";
+            document.getElementById("restart-btn").style.display = "inline-block";
             clearInterval(this.player.addictionTimer);
         } else if (this.player.is_addicted && this.player.has_hiv && this.player.health < 20) {
             text += "\nТы сгнил в подвале, но стал легендой среди нариков. Конец игры.";
             document.getElementById("actions").style.display = "none";
+            document.getElementById("restart-btn").style.display = "inline-block";
             clearInterval(this.player.addictionTimer);
         }
 
