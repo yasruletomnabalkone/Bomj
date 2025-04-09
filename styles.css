@@ -1,253 +1,102 @@
-* {
+body {
+    background-color: #3c2f2f; /* грязно-коричневый */
+    color: #b0a8a8; /* бледно-серый */
+    font-family: 'Courier New', Courier, monospace;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
-    font-family: 'Courier New', Courier, monospace;
 }
 
-body {
-    background: linear-gradient(135deg, #2f1e0f 0%, #3c2a15 100%); /* Тёмно-коричневый градиент */
-    color: #d4a017; /* Грязно-жёлтый текст */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
+.game-container {
+    max-width: 700px;
+    margin: 20px auto;
     padding: 20px;
-    overflow-x: hidden;
-    transition: background 0.5s;
-    background-image: url('https://www.transparenttextures.com/patterns/dirty-old-black-shirt.png'); /* Текстура грязи */
-    background-size: 200px;
-}
-
-/* Эффекты погоды и времени суток */
-body.rain {
-    background: linear-gradient(135deg, #1f140a 0%, #2a1c0f 100%);
-    animation: rainEffect 0.5s infinite;
-}
-
-body.snow {
-    background: linear-gradient(135deg, #3c2a15 0%, #4a381d 100%);
-    animation: snowEffect 2s infinite;
-}
-
-body.night {
-    background: linear-gradient(135deg, #1a0f07 0%, #25180c 100%);
-}
-
-@keyframes rainEffect {
-    0% { background-position: 0 0; }
-    100% { background-position: 0 100px; }
-}
-
-@keyframes snowEffect {
-    0% { background-position: 0 0; }
-    100% { background-position: 0 200px; }
-}
-
-#game-container {
-    background: rgba(34, 24, 12, 0.9); /* Тёмно-коричневый с прозрачностью */
-    border: 2px solid #8a5a2b; /* Грязно-коричневая рамка */
-    border-radius: 10px;
-    padding: 20px;
-    max-width: 800px;
-    width: 100%;
-    box-shadow: 0 0 20px #5a3c1e, 0 0 40px #3c2a15;
-    animation: dirtyGlow 1.5s infinite alternate;
-}
-
-@keyframes dirtyGlow {
-    from {
-        box-shadow: 0 0 10px #5a3c1e, 0 0 20px #3c2a15;
-    }
-    to {
-        box-shadow: 0 0 20px #5a3c1e, 0 0 40px #3c2a15;
-    }
+    background-color: #2f2f2f; /* тёмно-серый */
+    border: 3px solid #1a1a1a;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
 }
 
 h1 {
     text-align: center;
-    color: #b58900; /* Грязно-жёлтый заголовок */
-    text-shadow: 0 0 10px #5a3c1e;
+    color: #8b4513; /* ржаво-коричневый */
+    text-transform: uppercase;
     margin-bottom: 20px;
-    font-size: 2rem;
 }
 
-#output {
-    background: #1a0f07; /* Очень тёмный коричневый */
-    border: 1px solid #8a5a2b;
-    padding: 15px;
+.status, .output, .quests {
     margin-bottom: 20px;
-    height: 200px;
-    overflow-y: auto;
-    color: #d4a017;
-    text-shadow: 0 0 5px #5a3c1e;
-    font-size: 1rem;
-    line-height: 1.5;
+    padding: 15px;
+    background-color: #1e1e1e;
+    border: 1px solid #333;
     white-space: pre-wrap;
 }
 
-#status {
-    background: #2f1e0f;
-    border: 1px solid #8a5a2b;
-    padding: 10px;
-    margin-bottom: 20px;
-    color: #d4a017;
-    text-shadow: 0 0 5px #5a3c1e;
-    font-size: 0.9rem;
-    line-height: 1.4;
+.output {
+    height: 200px;
+    overflow-y: auto;
+    border: 1px dashed #4a4a4a;
 }
 
-#actions {
+.actions {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    justify-content: center;
-    margin-bottom: 20px;
 }
 
-button {
-    background: #8a5a2b; /* Ржаво-коричневый */
-    color: #d4a017;
-    border: none;
-    padding: 10px 20px;
-    font-size: 1rem;
+.actions button, .prompt button, .restart-btn {
+    padding: 10px;
+    background-color: #4a4a4a; /* серо-грязный */
+    color: #b0a8a8;
+    border: 1px solid #333;
     cursor: pointer;
-    text-transform: uppercase;
-    transition: all 0.3s;
-    box-shadow: 0 0 10px #5a3c1e;
+    font-size: 14px;
 }
 
-button:hover {
-    background: #b58900; /* Грязно-жёлтый при наведении */
-    color: #1a0f07;
-    box-shadow: 0 0 20px #5a3c1e;
+.actions button:hover, .prompt button:hover, .restart-btn:hover {
+    background-color: #5a5a5a;
 }
 
-#restart-btn {
-    background: #a52a2a; /* Тёмно-красный для кнопки перезапуска */
-    color: #d4a017;
-    box-shadow: 0 0 10px #5a3c1e;
-    display: none; /* По умолчанию скрыта */
-}
-
-#restart-btn:hover {
-    background: #c0392b;
-    box-shadow: 0 0 20px #5a3c1e;
-}
-
-#danya-options {
+.restart-btn {
     display: none;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-    margin-bottom: 20px;
+    width: 100%;
+    margin-top: 10px;
+    background-color: #6b4e31; /* грязно-коричневый */
 }
 
-.modal {
+.prompt {
     display: none;
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(34, 24, 12, 0.9);
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
-}
-
-.modal-content {
-    background: #1a0f07;
-    border: 2px solid #8a5a2b;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #252525;
     padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    box-shadow: 0 0 20px #5a3c1e;
-    max-width: 500px;
-    width: 90%;
+    border: 2px solid #1a1a1a;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
 }
 
-.modal-content h3 {
-    color: #b58900;
-    text-shadow: 0 0 5px #5a3c1e;
-    margin-bottom: 20px;
+.prompt h3 {
+    color: #8b4513;
+    margin-top: 0;
 }
 
-#location-options, #item-options, #combine-options {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-    margin-bottom: 20px;
-}
-
-.animate {
-    animation: zoomIn 0.3s ease-in-out;
-}
-
-@keyframes zoomIn {
-    from {
-        transform: scale(0);
-        opacity: 0;
-    }
-    to {
-        transform: scale(1);
-        opacity: 1;
-    }
-}
-
-.quest-log {
-    background: #2f1e0f;
-    border: 1px solid #8a5a2b;
-    padding: 10px;
-    color: #d4a017;
-    text-shadow: 0 0 5px #5a3c1e;
-}
-
-.quest-log h3 {
-    color: #b58900;
-    text-shadow: 0 0 5px #5a3c1e;
+.prompt div {
     margin-bottom: 10px;
 }
 
-#quest-list {
-    list-style: none;
-}
-
-#quest-list li {
+.prompt button {
+    margin-right: 5px;
     margin-bottom: 5px;
-    font-size: 0.9rem;
 }
 
-/* Адаптивность */
-@media (max-width: 600px) {
-    #game-container {
-        padding: 10px;
-    }
+/* Эффекты погоды */
+.rain {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5));
+}
 
-    h1 {
-        font-size: 1.5rem;
-    }
+.snow {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1));
+}
 
-    #output {
-        height: 150px;
-        font-size: 0.9rem;
-    }
-
-    #status {
-        font-size: 0.8rem;
-    }
-
-    button {
-        padding: 8px 15px;
-        font-size: 0.9rem;
-    }
-
-    .modal-content {
-        padding: 15px;
-    }
-
-    .modal-content h3 {
-        font-size: 1.2rem;
-    }
+.night {
+    filter: brightness(0.7);
 }
