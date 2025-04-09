@@ -2,7 +2,7 @@ const game = {
     player: {
         health: 100,
         strength: 5,
-        inventory: ['кирпич', 'бутылка'], // Начальный инвентарь
+        inventory: ['кирпич', 'бутылка'],
         reputation: 0,
         tugriks: 0,
         quests: {},
@@ -18,15 +18,15 @@ const game = {
         { name: "Помойка у парадной", description: "Аристократическая помойка: битые чашки и шампанское.", items: ["банка тушёнки", "бабушкин суп", "кольцо с фианитом"], danger_level: 3, unique_action: "покормить кота" },
         { name: "Заброшенная квартира", description: "Заброшенная хата с ободранными обоями и запахом фентанила.", items: ["грязный шприц", "доза фентанила", "пустая пачка сигарет"], danger_level: 10, unique_action: "обыскать тайник" },
         { name: "Ломбард", description: "Тёмный закуток с мутным типом за стойкой.", items: ["ржавый гвоздь", "пустая пачка сигарет"], danger_level: 4, unique_action: "продать шмот" },
-        { name: "Подвал", description: "Сырой подвал с крысами и шмотками.", items: ["старая куртка", "крысиный яд", "10 тугриков"], danger_level: 5, unique_action: "поймать крысу" },
+        { name: "Подвал", description: "Сырой подвал с крысами и шмотками.", items: ["старая куртка", "крысиный яд", "20 тугриков"], danger_level: 5, unique_action: "поймать крысу" },
         { name: "Парадная", description: "Обоссанная парадная с граффити 'Даня — лох'.", items: ["пакет с клеем", "мобильник без симки"], danger_level: 3, unique_action: "позвонить в домофон" }
     ],
 
     weather: "ясно",
     timeOfDay: "день",
     npcs: [
-        { name: "Бабка с клюкой", location: "Помойка у парадной", quest: "принести суп", reward: { tugriks: 20, reputation: 10 } },
-        { name: "Скинхед Петя", location: "Гаражи за домом", quest: "дать 'Жигулёвское'", reward: { strength: 2, reputation: 20 } },
+        { name: "Бабка с клюкой", location: "Помойка у парадной", quest: "принести суп", reward: { tugriks: 50, reputation: 20 } },
+        { name: "Скинхед Петя", location: "Гаражи за домом", quest: "дать 'Жигулёвское'", reward: { strength: 3, reputation: 30 } },
         { name: "Менты", location: null, quest: null, effect: "шмон" }
     ],
 
@@ -50,8 +50,6 @@ const game = {
     init() {
         this.loadGame();
         if (!this.currentLocation) this.currentLocation = this.locations[0];
-
-        // Проверяем, завершена ли игра
         if (this.isGameOver()) {
             this.showGameOverState();
         } else {
@@ -64,55 +62,30 @@ const game = {
         return (
             this.player.health <= 0 ||
             this.player.tugriks >= 1000 ||
-            this.player.reputation >= 100 ||
-            (this.player.is_addicted && this.player.has_hiv && this.player.health < 20)
-        );
+            this.player.reputation >= 100
+        ); // Убрал сложное условие с ВИЧ и зависимостью, оно слишком жёсткое
     },
 
     showGameOverState() {
         let text = `Вы находитесь: ${this.currentLocation.name}\n${this.currentLocation.description}\n`;
         if (this.player.health <= 0) {
-            if (this.player.is_addicted) {
-                text += "Ты нашёл грязный шприц на улице, ширнулся и умер от заражения крови. Конец игры.";
-            } else {
-                text += "Ты сгнил в питерских помойках. Конец игры.";
-            }
+            text += this.player.is_addicted ? "Ширнулся грязным шприцом и сгнил. Конец." : "Сгнил в питерских помойках. Конец.";
         } else if (this.player.tugriks >= 1000) {
-            text += "Ты набрал 1000 тугриков! Снял хату, нашёл работу и выбрался из этого дерьма. Победа!";
+            text += "Накопил 1000 тугриков! Снял хату и выбрался. Победа!";
         } else if (this.player.reputation >= 100) {
-            text += "Ты стал королём помойки! Все уважают тебя, даже скинхеды. Победа!";
-        } else if (this.player.is_addicted && this.player.has_hiv && this.player.health < 20) {
-            text += "Ты сгнил в подвале, но стал легендой среди нариков. Конец игры.";
-        } else {
-            text += "Игра окончена по неизвестной причине.";
+            text += "Стал королём помойки! Все уважают. Победа!";
         }
-
         this.output.innerText = text;
-        const actionsDiv = document.getElementById("actions");
-        const restartBtn = document.getElementById("restart-btn");
-
-        if (actionsDiv) {
-            actionsDiv.style.display = "none";
-        } else {
-            console.error("Элемент #actions не найден!");
-        }
-
-        if (restartBtn) {
-            restartBtn.style.display = "inline-block";
-            console.log("Кнопка 'Перезапустить' должна быть видна");
-        } else {
-            console.error("Элемент #restart-btn не найден!");
-        }
-
+        document.getElementById("actions").style.display = "none";
+        document.getElementById("restart-btn").style.display = "inline-block";
         this.updateStatus();
     },
 
     restart() {
-        // Сбрасываем состояние игрока
         this.player = {
             health: 100,
             strength: 5,
-            inventory: ['кирпич', 'бутылка'], // Начальный инвентарь
+            inventory: ['кирпич', 'бутылка'],
             reputation: 0,
             tugriks: 0,
             quests: {},
@@ -124,21 +97,13 @@ const game = {
         this.currentLocation = this.locations[0];
         this.weather = "ясно";
         this.timeOfDay = "день";
-        
-        // Очищаем localStorage
         localStorage.removeItem("gameState");
-
-        // Очищаем таймеры
         if (this.player.addictionTimer) clearInterval(this.player.addictionTimer);
-
-        // Сбрасываем интерфейс
-        this.output.innerText = "Добро пожаловать в мусорные глубины Санкт-Петербурга! 🗑️🏙️\nВаша цель — выжить в этом аду.";
+        this.output.innerText = "Добро пожаловать в мусорные глубины Санкт-Петербурга!";
         document.getElementById("actions").style.display = "flex";
         document.getElementById("restart-btn").style.display = "none";
         this.danyaOptions.style.display = "none";
-        document.body.className = ""; // Сбрасываем эффекты погоды
-
-        // Перезапускаем игру
+        document.body.className = "";
         this.updateWeatherAndTime();
         this.updateGame();
     },
@@ -175,19 +140,17 @@ const game = {
         if (this.timeOfDay === "ночь") document.body.classList.add("night");
 
         if (this.weather === "дождь" && !this.player.inventory.includes("старая куртка")) {
-            this.player.health -= 5;
-            addOutput("Дождь промочил тебя до костей. -5 HP");
-        }
-        if (this.timeOfDay === "ночь") {
-            addOutput("Ночь. Шмотки найти сложнее, но тугрики в тайниках.");
+            this.player.health -= 3; // Снижено с 5 до 3
+            addOutput("Дождь промочил тебя. -3 HP");
         }
     },
 
     updateStatus() {
+        if (this.player.health > 100) this.player.health = 100; // Ограничение здоровья
         let status = `♥ Здоровье: ${this.player.health} | 💪 Сила: ${this.player.strength} | 🎭 Репутация: ${this.player.reputation} | 💰 Тугрики: ${this.player.tugriks}\n`;
         status += `🎒 Инвентарь: ${this.player.inventory.length > 0 ? this.player.inventory.join(", ") : "пусто"}\n`;
         status += `🌦 Погода: ${this.weather} | 🕒 Время: ${this.timeOfDay}\n`;
-        if (this.player.is_addicted) status += "💉 Ты зависим от фентанила!\n";
+        if (this.player.is_addicted) status += "💉 Зависим от фентанила!\n";
         if (this.player.has_hiv) status += "🩺 У тебя ВИЧ!\n";
         if (this.player.is_drunk) status += "🍺 Ты пьяный!\n";
         document.getElementById("status").innerText = status;
@@ -204,14 +167,13 @@ const game = {
     updateGame() {
         let text = `Вы находитесь: ${this.currentLocation.name}\n${this.currentLocation.description}`;
         if (this.timeOfDay === "ночь") text += " Ночь скрывает мусор.";
-        if (this.weather === "дождь") text += " Дождь заливает всё вокруг.";
+        if (this.weather === "дождь") text += " Дождь заливает всё.";
 
-        if (this.currentLocation.name === "Заброшенная квартира" && !this.player.has_hiv && Math.random() > 0.5) {
-            text += "\nОбдолбанный нарик втыкает в тебя грязный шприц!";
+        if (this.currentLocation.name === "Заброшенная квартира" && !this.player.has_hiv && Math.random() > 0.8) { // Шанс снижен с 0.5 до 0.2 (1-0.8)
             this.startAddiction();
             this.player.has_hiv = true;
-            this.player.health -= 20;
-            text += "\nТы стал зависимым от фентанила и заразился ВИЧ! -20 HP";
+            this.player.health -= 10; // Снижено с 20 до 10
+            text += "\nНаркоман ткнул тебя шприцом! ВИЧ и зависимость. -10 HP";
         }
 
         if (this.isGameOver()) {
@@ -236,28 +198,28 @@ const game = {
         if (!this.player.addictionTimer) {
             this.player.addictionTimer = setInterval(() => {
                 if (!this.player.inventory.includes("доза фентанила")) {
-                    this.player.health -= 5;
-                    addOutput("Ломка бьёт... -5 HP");
+                    this.player.health -= 3; // Снижено с 5 до 3
+                    addOutput("Ломка бьёт... -3 HP");
                     this.updateGame();
                 }
-            }, 10000);
+            }, 15000); // Увеличено с 10 до 15 секунд
         }
     },
 
     combineItems(item1, item2) {
         let text = "";
-        if (item1 === "доширак" && item2 === "чекушка 'Беленькой'" && this.player.inventory.includes(item1) && this.player.inventory.includes(item2)) {
+        if (item1 === "доширак" && item2 === "чекушка 'Беленькой'") {
             this.player.inventory.splice(this.player.inventory.indexOf(item1), 1);
             this.player.inventory.splice(this.player.inventory.indexOf(item2), 1);
             this.player.inventory.push("горячий дошик");
             text = "Залил дошик чекушкой. Получился горячий дошик!";
-        } else if (item1 === "ржавый гвоздь" && item2 === "старая куртка" && this.player.inventory.includes(item1) && this.player.inventory.includes(item2)) {
+        } else if (item1 === "ржавый гвоздь" && item2 === "старая куртка") {
             this.player.inventory.splice(this.player.inventory.indexOf(item1), 1);
             this.player.inventory.splice(this.player.inventory.indexOf(item2), 1);
             this.player.inventory.push("штык-куртка");
             text = "Пришил гвоздь к куртке. Теперь это штык-куртка!";
         } else {
-            text = "Это не комбинируется, дебил.";
+            text = "Это не комбинируется.";
         }
         addOutput(text);
         this.updateGame();
@@ -267,7 +229,7 @@ const game = {
         const enemies = {
             "крысы": { strength: 3, loot: "крысиный яд" },
             "скинхеды": { strength: 10, loot: "ящик 'Жигулевского'" },
-            "пьяный дворник": { strength: 7, loot: "10 тугриков" },
+            "пьяный дворник": { strength: 7, loot: "20 тугриков" }, // Увеличил с 10 до 20
             "наркоманы": { strength: 8, loot: "грязный шприц" }
         };
         let enemy = enemies[attacker];
@@ -279,7 +241,7 @@ const game = {
             this.player.inventory.push(enemy.loot);
             this.checkQuestCompletion(enemy.loot);
         } else {
-            let damage = Math.floor(Math.random() * (enemy.strength - playerStrength + 1)) + 5;
+            let damage = Math.floor(Math.random() * (enemy.strength - playerStrength + 1)) + 3; // Снижено с +5 до +3
             this.player.health -= damage;
             text += `${attacker} уделали тебя! -${damage} HP`;
         }
@@ -291,8 +253,8 @@ const game = {
         addOutput(text);
         let choice = prompt("Выбери бак (1, 2 или 3):");
         if (!choice || isNaN(choice) || choice < 1 || choice > 3) {
-            addOutput("Ты чё, дебил? Урон -5 HP за тупость.");
-            this.player.health -= 5;
+            addOutput("Неправильный выбор. -3 HP");
+            this.player.health -= 3; // Снижено с 5 до 3
             hideSearchMiniGame();
             this.updateGame();
             return;
@@ -301,56 +263,56 @@ const game = {
         let winningContainer = Math.floor(Math.random() * 3) + 1;
         if (parseInt(choice) === winningContainer) {
             let foundItem = this.currentLocation.items[Math.floor(Math.random() * this.currentLocation.items.length)];
-            if (foundItem === "10 тугриков") {
-                this.player.tugriks += 10;
-                addOutput("Угадал! Нашёл 10 тугриков.");
+            if (foundItem === "20 тугриков") { // Исправлено с "10 тугриков"
+                this.player.tugriks += 20;
+                addOutput("Нашёл 20 тугриков!");
             } else {
                 this.player.inventory.push(foundItem);
-                addOutput(`Угадал! Нашёл: ${foundItem}.`);
+                addOutput(`Нашёл: ${foundItem}.`);
             }
             this.checkQuestCompletion(foundItem);
         } else {
-            let damage = Math.floor(Math.random() * 10) + 5;
+            let damage = Math.floor(Math.random() * 7) + 3; // Снижено с 10 до 7
             this.player.health -= damage;
-            addOutput(`Пусто! Пока копался, пьяный бомж пнул тебя. -${damage} HP`);
+            addOutput(`Пусто! Пьяный бомж пнул тебя. -${damage} HP`);
         }
         hideSearchMiniGame();
         this.updateGame();
     },
 
     miniGameRiddle() {
-        let text = "Гопник: 'Э, петух, докажи, что не лох! Отгадай:'";
-        let riddle = this.riddles[Math.floor(Math.random() * this.riddles.length)];
+        let text = "Гопник: 'Отгадай или пиздец!'";
+        let riddle = this.riddles[0];
         text += `\n${riddle.question}`;
         riddle.options.forEach((opt, i) => text += `\n${i + 1}. ${opt}`);
         addOutput(text);
 
         let choice = prompt("Выбери ответ (1-4):");
         if (!choice || isNaN(choice) || choice < 1 || choice > 4) {
-            addOutput("Ты чё, дебил? Урон -5 HP за тупость.");
-            this.player.health -= 5;
+            addOutput("Тупишь? -3 HP");
+            this.player.health -= 3; // Снижено с 5 до 3
             this.updateGame();
             return;
         }
 
         if (parseInt(choice) - 1 === riddle.correct) {
-            let reward = Math.floor(Math.random() * 20) + 10;
+            let reward = Math.floor(Math.random() * 20) + 20; // Увеличено с 10-20 до 20-40
             this.player.tugriks += reward;
-            addOutput(`Гопник: 'Молодец, петух! Вот тебе ${reward} тугриков.'`);
+            addOutput(`Гопник: 'Молодец! Вот ${reward} тугриков.'`);
         } else {
-            let damage = Math.floor(Math.random() * 10) + 5;
+            let damage = Math.floor(Math.random() * 7) + 3; // Снижено с 10 до 7
             this.player.health -= damage;
-            addOutput(`Гопник: 'Лох ты!' *бьёт в рыло* -${damage} HP`);
+            addOutput(`Гопник бьёт в рыло. -${damage} HP`);
         }
         this.updateGame();
     },
 
     tradeOpportunity() {
         let discount = this.player.reputation > 50 ? 10 : 0;
-        let text = `Барыга: 'Есть ${this.player.tugriks} тугриков? Бери шмот!'\n`;
+        let text = `Барыга: 'Бери шмот!'\n`;
         text += `1 — Балтика (${50 - discount} тугриков), 2 — Доза (${70 - discount} тугриков), 3 — Мобильник (${100 - discount} тугриков), 4 — Отказаться`;
         addOutput(text);
-        let choice = prompt("Что берёшь? (1, 2, 3, 4):");
+        let choice = prompt("Что берёшь? (1-4):");
 
         if (choice === "1" && this.player.tugriks >= (50 - discount)) {
             this.player.tugriks -= (50 - discount);
@@ -364,10 +326,8 @@ const game = {
             this.player.tugriks -= (100 - discount);
             this.player.inventory.push("мобильник без симки");
             addOutput(`Купил мобильник за ${100 - discount} тугриков!`);
-        } else if (choice === "4") {
-            addOutput("Барыга плюнул тебе под ноги и ушёл.");
         } else {
-            addOutput("'Чё бормочешь?' — барыга уходит.");
+            addOutput("Барыга ушёл.");
         }
         this.updateGame();
     },
@@ -375,20 +335,20 @@ const game = {
     randomEvent() {
         const events = [
             () => {
-                this.player.tugriks += 50;
-                return "Нашёл кошелёк на мусорке! +50 тугриков.";
+                this.player.tugriks += 70; // Увеличено с 50 до 70
+                return "Нашёл кошелёк! +70 тугриков.";
             },
             () => {
-                let loss = Math.floor(this.player.tugriks / 2);
+                let loss = Math.floor(this.player.tugriks / 3); // Снижено с /2 до /3
                 this.player.tugriks -= loss;
-                return `Пока спал, воры спиздили ${loss} тугриков!`;
+                return `Воры спиздили ${loss} тугриков!`;
             },
             () => {
                 if (this.player.inventory.includes("доза фентанила")) {
                     this.player.inventory.splice(this.player.inventory.indexOf("доза фентанила"), 1);
-                    return "Менты шмонают район! Дозу спалили, конфисковали.";
+                    return "Менты конфисковали дозу!";
                 }
-                return "Менты шмонают район, но у тебя ничего нет.";
+                return "Менты прошли мимо.";
             }
         ];
         let event = events[Math.floor(Math.random() * events.length)];
@@ -418,9 +378,9 @@ const game = {
             let danyaChance = this.player.reputation > 50 ? 0.9 : 0.7;
             if (Math.random() < danyaChance) {
                 this.danyaOptions.style.display = "flex";
-                text += "Даня вылез: 'О, кент! Дашь на опохмел?'";
+                text += "Даня: 'Дашь на опохмел?'";
             } else {
-                text += "Даня где-то нажрался и спит.";
+                text += "Даня спит где-то.";
             }
             addOutput(text);
             this.updateGame();
@@ -433,7 +393,7 @@ const game = {
             if (npc && npc.quest) {
                 text += this.npcInteraction(npc);
             } else {
-                text += "Тут никого нет, кроме крыс.";
+                text += "Тут никого.";
             }
             addOutput(text);
             this.updateGame();
@@ -445,138 +405,139 @@ const game = {
         if (action === "разбить окно" && this.currentLocation.name === "Контейнер у 'Пятёрочки'") {
             if (this.player.inventory.includes("битый кирпич") || this.player.inventory.includes("кирпич")) {
                 this.player.inventory.push("чекушка 'Беленькой'");
-                return "Разъебал окно 'Пятёрочки' и спиздил чекушку!";
+                return "Разбил окно и спиздил чекушку!";
             }
-            return "Нечем бить окно, дебил.";
+            return "Нечем бить.";
         } else if (action === "спиздить бензин" && this.currentLocation.name === "Гаражи за домом") {
             if (Math.random() > 0.5) {
                 this.player.inventory.push("канистра бензина");
-                return "Спиздил канистру бензина!";
+                return "Спиздил бензин!";
             }
             return this.fight("скинхеды");
         } else if (action === "покормить кота" && this.currentLocation.name === "Помойка у парадной") {
             if (this.player.inventory.includes("банка тушёнки")) {
                 this.player.inventory.splice(this.player.inventory.indexOf("банка тушёнки"), 1);
-                this.player.reputation += 10;
-                return "Покормил кота тушёнкой. Бабки уважают! +10 репутации.";
+                this.player.reputation += 20; // Увеличено с 10 до 20
+                return "Покормил кота. +20 репутации.";
             }
-            return "Нет тушёнки, кот орёт.";
+            return "Нет тушёнки.";
         } else if (action === "обыскать тайник" && this.currentLocation.name === "Заброшенная квартира") {
-            if (Math.random() > 0.7) {
-                this.player.tugriks += 50;
-                return "Нашёл тайник! +50 тугриков.";
+            if (Math.random() > 0.5) { // Увеличено с 0.3 до 0.5
+                this.player.tugriks += 70; // Увеличено с 50 до 70
+                return "Нашёл тайник! +70 тугриков.";
             }
-            return "Тайник пустой, только шприцы.";
+            return "Тайник пустой.";
         } else if (action === "продать шмот" && this.currentLocation.name === "Ломбард") {
             let item = prompt("Что продать?");
             if (this.player.inventory.includes(item)) {
-                let price = item === "кольцо с фианитом" ? 100 : 20;
+                let price = item === "кольцо с фианитом" ? 150 : item === "ржавый гвоздь" ? 10 : 30; // Добавил цену для гвоздя
                 this.player.tugriks += price;
                 this.player.inventory.splice(this.player.inventory.indexOf(item), 1);
                 return `Сдал ${item} за ${price} тугриков!`;
             }
-            return "Такого шмота нет.";
+            return "Нет такого.";
         } else if (action === "поймать крысу" && this.currentLocation.name === "Подвал") {
             if (Math.random() > 0.5) {
                 this.player.inventory.push("дохлая крыса");
-                return "Поймал крысу! Может, бабка купит?";
+                return "Поймал крысу!";
             }
-            return "Крыса укусила и сбежала. -5 HP";
+            this.player.health -= 3; // Снижено с 5 до 3
+            return "Крыса укусила. -3 HP";
         } else if (action === "позвонить в домофон" && this.currentLocation.name === "Парадная") {
-            if (Math.random() > 0.8) {
-                this.player.tugriks += 10;
-                return "Кто-то кинул 10 тугриков с балкона!";
+            if (Math.random() > 0.7) { // Увеличено с 0.2 до 0.3
+                this.player.tugriks += 20; // Увеличено с 10 до 20
+                return "Кинули 20 тугриков!";
             }
-            return "Тебя обматерили через домофон.";
+            return "Обматерили.";
         }
-        return "Тут нечего делать.";
+        return "Нечего делать.";
     },
 
     npcInteraction(npc) {
         if (npc.name === "Бабка с клюкой" && npc.quest && !(npc.quest in this.player.quests)) {
             this.player.quests[npc.quest] = { description: "Бабка хочет суп.", reward: npc.reward };
-            return "Бабка: 'Принеси суп, алкаш, дам 20 тугриков!'";
+            return "Бабка: 'Принеси суп, дам 50 тугриков!'";
         } else if (npc.name === "Скинхед Петя" && npc.quest && !(npc.quest in this.player.quests)) {
             this.player.quests[npc.quest] = { description: "Петя хочет 'Жигулёвское'.", reward: npc.reward };
-            return "Петя: 'Го пивка, братан, буду твой кореш!'";
+            return "Петя: 'Го пивка, братан!'";
         }
-        return `${npc.name}: 'Чё надо? Вали!'`;
+        return `${npc.name}: 'Вали!'`;
     },
 
     useItem(item) {
         if (!this.player.inventory.includes(item)) {
-            addOutput(`У тебя нет ${item}.`);
+            addOutput(`Нет ${item}.`);
             hideItemPrompt();
             return;
         }
 
         let text = "";
         if (item === "банка тушёнки") {
-            this.player.health += 15;
-            text = "Сожрал тушёнку! +15 HP";
+            this.player.health += 20; // Увеличено с 15 до 20
+            text = "Сожрал тушёнку! +20 HP";
         } else if (item === "полупустая бутылка 'Балтики'" || item === "полная бутылка 'Балтики'" || item === "бутылка") {
             this.player.is_drunk = true;
-            text = "Выжрал 'Балтику'. Скоро пиздец!";
+            text = "Выжрал 'Балтику'.";
             setTimeout(() => {
-                this.player.health -= 15;
-                this.player.reputation -= 20;
+                this.player.health -= 10; // Снижено с 15 до 10
+                this.player.reputation -= 10; // Снижено с 20 до 10
                 this.player.is_drunk = false;
-                addOutput("Проснулся в луже мочи. -15 HP, -20 репутации");
+                addOutput("Проснулся в луже. -10 HP, -10 репутации");
                 this.updateGame();
             }, 5000);
         } else if (item === "доширак") {
-            this.player.health += 5;
-            text = "Сожрал сухой дошик. +5 HP";
+            this.player.health += 10; // Увеличено с 5 до 10
+            text = "Сожрал дошик. +10 HP";
         } else if (item === "горячий дошик") {
-            this.player.health += 15;
-            text = "Сожрал горячий дошик. Вкусно! +15 HP";
+            this.player.health += 25; // Увеличено с 15 до 25
+            text = "Сожрал горячий дошик! +25 HP";
         } else if (item === "ключ от квартиры") {
             this.currentLocation = this.locations.find(loc => loc.name === "Заброшенная квартира");
             text = "Открыл хату...";
         } else if ((item === "битый кирпич" || item === "кирпич") && this.currentLocation.name === "Контейнер у 'Пятёрочки'") {
             this.player.inventory.push("чекушка 'Беленькой'");
-            text = "Разъебал окно 'Пятёрочки' и спиздил чекушку!";
+            text = "Разбил окно и спиздил чекушку!";
         } else if (item === "доза фентанила" && this.player.is_addicted) {
-            this.player.health += 10;
-            text = "Ширнулся. Ломка ушла! +10 HP";
+            this.player.health += 15; // Увеличено с 10 до 15
+            text = "Ширнулся. Ломка ушла! +15 HP";
         } else if (item === "грязный шприц" && this.player.inventory.includes("доза фентанила")) {
             this.startAddiction();
             this.player.has_hiv = true;
-            this.player.health -= 20;
+            this.player.health -= 10; // Снижено с 20 до 10
             this.player.inventory.splice(this.player.inventory.indexOf("доза фентанила"), 1);
-            text = "Ширнулся грязным шприцом. Зависим и с ВИЧ! -20 HP";
+            text = "Ширнулся грязным шприцом. ВИЧ! -10 HP";
         } else if (item === "бабушкин суп") {
-            this.player.health += 30;
-            text = "Выжрал суп. Детство вспомнил! +30 HP";
+            this.player.health += 40; // Увеличено с 30 до 40
+            text = "Выжрал суп! +40 HP";
         } else if (item === "кольцо с фианитом" && this.currentLocation.name === "Ломбард") {
-            this.player.tugriks += 100;
-            text = "Сдал кольцо. +100 тугриков!";
+            this.player.tugriks += 150; // Увеличено с 100 до 150
+            text = "Сдал кольцо. +150 тугриков!";
         } else if (item === "пустая пачка сигарет" && this.player.inventory.includes("доза фентанила")) {
             this.player.inventory.splice(this.player.inventory.indexOf("доза фентанила"), 1);
             this.player.inventory.push("пачка с фентанилом");
             text = "Спрятал дозу в пачку.";
         } else if (item === "старая куртка") {
-            this.player.reputation += 10;
-            text = "Натянул куртку. Выглядишь чуть лучше! +10 репутации";
+            this.player.reputation += 15; // Увеличено с 10 до 15
+            text = "Натянул куртку. +15 репутации";
         } else if (item === "штык-куртка") {
-            this.player.reputation += 20;
-            this.player.strength += 2;
-            text = "Натянул штык-куртку. Теперь ты опасен! +20 репутации, +2 силы";
+            this.player.reputation += 25; // Увеличено с 20 до 25
+            this.player.strength += 3; // Увеличено с 2 до 3
+            text = "Натянул штык-куртку! +25 репутации, +3 силы";
         } else if (item === "крысиный яд") {
-            this.player.health -= 10;
-            text = "Случайно вдохнул крысиный яд. -10 HP";
+            this.player.health -= 7; // Снижено с 10 до 7
+            text = "Вдохнул яд. -7 HP";
         } else if (item === "пакет с клеем") {
-            this.player.reputation += 10;
-            this.player.health -= 5;
-            text = "Нюхнул клей. Гопники уважают, но башка болит. +10 репутации, -5 HP";
+            this.player.reputation += 15; // Увеличено с 10 до 15
+            this.player.health -= 3; // Снижено с 5 до 3
+            text = "Нюхнул клей. +15 репутации, -3 HP";
         } else if (item === "мобильник без симки" && this.currentLocation.name === "Ломбард") {
-            this.player.tugriks += 50;
-            text = "Сдал мобильник. +50 тугриков!";
+            this.player.tugriks += 70; // Увеличено с 50 до 70
+            text = "Сдал мобильник. +70 тугриков!";
         } else if (item === "канистра бензина" && this.currentLocation.name === "Гаражи за домом") {
-            this.player.tugriks += 30;
-            text = "Сдал бензин скинхедам. +30 тугриков!";
+            this.player.tugriks += 50; // Увеличено с 30 до 50
+            text = "Сдал бензин. +50 тугриков!";
         } else {
-            text = "Не сюда и не так.";
+            text = "Не используется.";
             addOutput(text);
             hideItemPrompt();
             return;
@@ -592,14 +553,14 @@ const game = {
     danyaAction(action) {
         let text = "";
         const danyaQuests = {
-            "украсть заначку скинхедов": { description: "Скинхеды спрятали 'Жигулёвское' в гаражах.", reward: "история про рехаб" },
-            "принести Данье тушёнку": { description: "Даня хочет жрать после вчера.", reward: "история про бабушку с супом" },
+            "украсть заначку скинхедов": { description: "Скинхеды спрятали 'Жигулёвское'.", reward: "история про рехаб" },
+            "принести Данье тушёнку": { description: "Даня хочет жрать.", reward: "история про бабушку с супом" },
             "найти чекушку 'Беленькой'": { description: "Для 'лечения'.", reward: "история про побег от скинхедов" }
         };
 
         if (action === "поговорить") {
             if (Object.keys(this.player.quests).length === 0) {
-                text += "Даня: 'Есть дело, братан...'";
+                text += "Даня: 'Есть дело...'";
                 for (let quest in danyaQuests) {
                     text += `\n- '${quest}': ${danyaQuests[quest].description}`;
                 }
@@ -608,18 +569,18 @@ const game = {
                     this.player.quests[questChoice] = danyaQuests[questChoice];
                     text += `\nДаня: 'Сделаешь — будет ${danyaQuests[questChoice].reward}!'`;
                 } else {
-                    text += "\n'Ты чё, больной?' — Даня уходит.";
+                    text += "\nДаня: 'Ты чё?'";
                 }
             } else {
-                text += "Даня: 'Делай, что взял уже!'";
+                text += "Даня: 'Делай уже!'";
             }
         } else if (action === "дать бухло") {
             if (this.player.inventory.includes("полупустая бутылка 'Балтики'") || this.player.inventory.includes("бутылка")) {
                 this.player.inventory.splice(this.player.inventory.indexOf(this.player.inventory.includes("полупустая бутылка 'Балтики'") ? "полупустая бутылка 'Балтики'" : "бутылка"), 1);
-                this.player.reputation += 30;
-                text += "Даня глушит 'Балтику': 'В рехабе я...' *блюёт*";
+                this.player.reputation += 40; // Увеличено с 30 до 40
+                text += "Даня глушит 'Балтику'. +40 репутации";
             } else {
-                text += "'Где бухло, сука?' — Даня злится.";
+                text += "Даня: 'Где бухло?'";
             }
         } else if (action === "уйти") {
             text += "Даня свалил.";
@@ -631,24 +592,31 @@ const game = {
     },
 
     checkQuestCompletion(foundItem) {
+        let questToComplete = null;
         if (foundItem === "ящик 'Жигулевского'" && "украсть заначку скинхедов" in this.player.quests) {
-            this.completeQuest("украсть заначку скинхедов");
+            questToComplete = "украсть заначку скинхедов";
+            this.player.inventory.splice(this.player.inventory.indexOf(foundItem), 1); // Удаляем предмет
         } else if (foundItem === "чекушка 'Беленькой'" && "найти чекушку 'Беленькой'" in this.player.quests) {
-            this.completeQuest("найти чекушку 'Беленькой'");
+            questToComplete = "найти чекушку 'Беленькой'";
+            this.player.inventory.splice(this.player.inventory.indexOf(foundItem), 1);
         } else if (foundItem === "банка тушёнки" && "принести Данье тушёнку" in this.player.quests) {
-            this.completeQuest("принести Данье тушёнку");
+            questToComplete = "принести Данье тушёнку";
+            this.player.inventory.splice(this.player.inventory.indexOf(foundItem), 1);
         } else if (foundItem === "бабушкин суп" && "принести суп" in this.player.quests) {
-            this.completeQuest("принести суп");
+            questToComplete = "принести суп";
+            this.player.inventory.splice(this.player.inventory.indexOf(foundItem), 1);
         } else if (foundItem === "ящик 'Жигулевского'" && "дать 'Жигулёвское'" in this.player.quests) {
-            this.completeQuest("дать 'Жигулёвское'");
+            questToComplete = "дать 'Жигулёвское'";
+            this.player.inventory.splice(this.player.inventory.indexOf(foundItem), 1);
         }
+        if (questToComplete) this.completeQuest(questToComplete);
     },
 
     completeQuest(quest) {
         const stories = {
             "история про рехаб": "— В рехабе медсестра такая: 'Даня, ты в дерьме!', а я: 'Это Лёха!'",
-            "история про бабушка с супом": "— Бабка орала: 'Сдохни!', а суп — заебись, с картошкой...",
-            "история про побег от скинхедов": "— Бежал, а они: 'Стой, алкаш!' Я встал — пох*й."
+            "история про бабушку с супом": "— Бабка орала: 'Сдохни!', а суп — заебись...",
+            "история про побег от скинхедов": "— Бежал, а они: 'Стой!' Я встал — пох."
         };
         let reward = this.player.quests[quest].reward;
         if (typeof reward === "string") {
@@ -716,7 +684,7 @@ function showCombineItemsPrompt() {
     const container = document.getElementById("combine-options");
     container.innerHTML = '';
     if (items.length < 2) {
-        addOutput("Нужно минимум 2 предмета для комбинации!");
+        addOutput("Нужно 2 предмета!");
         return;
     }
     let selected = [];
