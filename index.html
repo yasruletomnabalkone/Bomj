@@ -2,154 +2,29 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Питерский Мусорный Квест</title>
+    <title>Питерская Помойка</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="game-container">
-        <h1>Питерский Мусорный Квест</h1>
-        <div id="output">
-            ░█▀▀░█▀█░█▀▄░▀█▀░█▀▀░░░█▀█░█░█░█▀▀░█▀▄░█▀█░█▀▄<br>
-            ░█▀▀░█░█░█▀▄░░█░░█▀▀░░░█▀▀░░█░░█▀▀░█▀▄░█░█░█░█<br>
-            ░▀▀▀░▀░▀░▀░▀░░▀░░▀▀▀░░░▀░░░░▀░░▀▀▀░▀░▀░▀▀▀░▀▀░<br>
-            Добро пожаловать в мусорные глубины Санкт-Петербурга! 🗑️🏙️<br>
-            Ваша цель — выжить в этом аду.
+    <div class="container">
+        <h1>Питерская Помойка</h1>
+        <div id="status" class="status"></div>
+        <div id="output" class="output"></div>
+        <div id="actions" class="actions">
+            <button onclick="game.action('искать')">Искать шмот</button>
+            <button onclick="game.action('уйти')">Свалить</button>
+            <button onclick="game.action('позвать Даню')">Позвать Даню</button>
+            <button onclick="game.action('уникальное действие')">Уникальное действие</button>
+            <button onclick="game.action('поговорить с NPC')">Поговорить с NPC</button>
+            <button onclick="showUseItemPrompt()">Юзнуть шмот</button>
+            <button onclick="showCombineItemsPrompt()">Скомбинировать шмот</button>
         </div>
-        <div id="status"></div>
-        <div id="actions">
-            <button onclick="game.searchArea()">Искать</button>
-            <button onclick="showLocationPrompt()">Пойти в другое место</button>
-            <button onclick="game.talkToDanya()">Позвать Даню</button>
-            <button onclick="showUseItemPrompt()">Использовать предмет</button>
-        </div>
-
-        <div id="danya-options" style="display: none;"></div>
-
-        <!-- Модальное окно выбора локации -->
-        <div id="location-prompt" class="modal" style="display: none;">
-            <div class="modal-content animate">
-                <h3>Куда хочешь пойти?</h3>
-                <div id="location-options"></div>
-                <button onclick="hideLocationPrompt()">Отмена</button>
-            </div>
-        </div>
-
-        <!-- Модальное окно выбора предмета -->
-        <div id="item-prompt" class="modal" style="display: none;">
-            <div class="modal-content animate">
-                <h3>Выбери предмет:</h3>
-                <div id="item-options"></div>
-                <button onclick="hideItemPrompt()">Отмена</button>
-            </div>
-        </div>
-
-        <!-- Мини-игра обыска -->
-        <div id="search-mini-game" class="modal" style="display: none;">
-            <div class="modal-content animate">
-                <h3>Ищем полезное среди мусора...</h3>
-                <button onclick="game.finishSearch(true)">Нашёл что-то</button>
-                <button onclick="game.finishSearch(false)">Ничего нет</button>
-            </div>
+        <div id="danya-options" class="danya-options" style="display: none;">
+            <button onclick="game.danyaAction('поговорить')">Поговорить</button>
+            <button onclick="game.danyaAction('дать бухло')">Дать бухло</button>
+            <button onclick="game.danyaAction('уйти')">Уйти</button>
         </div>
     </div>
-
-    <script>
-        const game = {
-            currentLocation: 'двор',
-            inventory: ['кирпич', 'бутылка', 'ключ'],
-            locations: {
-                'двор': ['подъезд', 'помойка'],
-                'подъезд': ['двор'],
-                'помойка': ['двор']
-            },
-
-            quests: {},
-
-            action(name) {
-                addOutput(`Вы выбрали действие: ${name}`);
-            },
-
-            talkToDanya() {
-                addOutput("Даня: Эй, брат, выручи! Мне нужен старый ключ из подъезда. Принесёшь — получишь ништяк!");
-                this.quests['ключ'] = 'найти';
-            },
-
-            danyaAction(name) {
-                addOutput(`Вы взаимодействуете с Даней: ${name}`);
-            },
-
-            goTo(location) {
-                this.currentLocation = location;
-                addOutput(`Вы пошли в ${location}.`);
-                hideLocationPrompt();
-            },
-
-            useItem(item) {
-                if (!this.inventory.includes(item)) {
-                    addOutput(`У вас нет ${item}.`);
-                    return;
-                }
-                addOutput(`Вы используете: ${item}`);
-                const index = this.inventory.indexOf(item);
-                if (index > -1) this.inventory.splice(index, 1);
-                hideItemPrompt();
-            },
-
-            searchArea() {
-                document.getElementById("search-mini-game").style.display = "flex";
-            },
-
-            finishSearch(success) {
-                document.getElementById("search-mini-game").style.display = "none";
-                if (success) {
-                    const found = 'монетка';
-                    this.inventory.push(found);
-                    addOutput(`Вы нашли: ${found}`);
-                } else {
-                    addOutput("Вы не нашли ничего полезного.");
-                }
-            }
-        };
-
-        function addOutput(text) {
-            const output = document.getElementById('output');
-            output.innerText += `\n${text}`;
-            output.scrollTop = output.scrollHeight;
-        }
-
-        function showLocationPrompt() {
-            const options = game.locations[game.currentLocation] || [];
-            const container = document.getElementById("location-options");
-            container.innerHTML = '';
-            options.forEach(loc => {
-                const btn = document.createElement("button");
-                btn.innerText = loc;
-                btn.onclick = () => game.goTo(loc);
-                container.appendChild(btn);
-            });
-            document.getElementById("location-prompt").style.display = "flex";
-        }
-
-        function hideLocationPrompt() {
-            document.getElementById("location-prompt").style.display = "none";
-        }
-
-        function showUseItemPrompt() {
-            const usableItems = game.inventory;
-            const container = document.getElementById("item-options");
-            container.innerHTML = '';
-            usableItems.forEach(item => {
-                const btn = document.createElement("button");
-                btn.innerText = item;
-                btn.onclick = () => game.useItem(item);
-                container.appendChild(btn);
-            });
-            document.getElementById("item-prompt").style.display = "flex";
-        }
-
-        function hideItemPrompt() {
-            document.getElementById("item-prompt").style.display = "none";
-        }
-    </script>
+    <script src="game.js"></script>
 </body>
 </html>
