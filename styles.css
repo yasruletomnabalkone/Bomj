@@ -1,102 +1,94 @@
 body {
-    background-color: #1a1a1a;
-    color: #e0e0e0;
-    font-family: 'Courier New', monospace;
+    background-color: #222;
+    color: #fff;
+    font-family: monospace;
+    text-align: center;
     margin: 0;
     padding: 20px;
-    line-height: 1.6;
 }
 
 #game-container {
     max-width: 800px;
     margin: 0 auto;
-    padding: 25px;
-    background-color: #2a2a2a;
-    border: 1px solid #444;
-    border-radius: 8px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    padding: 20px;
+    background-color: #333;
+    border: 2px solid #666;
+    animation: fadeIn 1s ease-in;
 }
 
 h1 {
-    font-size: 28px;
-    margin-bottom: 25px;
-    color: #ff5555;
-    text-align: center;
-    text-shadow: 1px 1px 2px #000;
+    font-size: 24px;
+    margin-bottom: 20px;
 }
 
-.game-text {
-    background-color: #252525;
-    padding: 15px;
-    border-radius: 5px;
+#output, #status {
     margin-bottom: 20px;
-    min-height: 150px;
-    border: 1px solid #333;
+    text-align: left;
+    white-space: pre-wrap;
+    max-height: 200px;
     overflow-y: auto;
-    max-height: 300px;
-}
-
-.status-panel {
-    background-color: #252525;
-    padding: 12px;
-    border-radius: 5px;
-    margin-bottom: 20px;
-    border: 1px solid #333;
-    color: #aaffaa;
-}
-
-.action-buttons, .danya-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 20px;
+    border: 1px solid #555;
+    padding: 10px;
+    background-color: #222;
+    animation: slideDown 0.5s ease-in;
 }
 
 button {
-    padding: 10px 15px;
-    background-color: #444;
+    padding: 8px 16px;
+    margin: 5px;
+    background-color: #666;
     color: #fff;
     border: none;
-    border-radius: 4px;
     cursor: pointer;
-    font-family: 'Courier New', monospace;
-    font-size: 14px;
-    transition: all 0.2s;
-    flex-grow: 1;
-    min-width: 120px;
+    font-family: monospace;
+    border-radius: 6px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 button:hover {
-    background-color: #555;
-    transform: translateY(-2px);
+    background-color: #888;
+    transform: scale(1.05);
 }
 
-button:active {
-    transform: translateY(0);
+#actions, #danya-options {
+    margin-top: 20px;
+    animation: fadeIn 1s ease-in;
 }
 
-#danya-options button {
-    background-color: #5a3d5a;
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-out;
 }
 
-#danya-options button:hover {
-    background-color: #6a4d6a;
+.modal-content {
+    background-color: #444;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 0 10px #000;
+    animation: popIn 0.3s ease-in-out;
 }
 
-/* Полоса прокрутки для вывода текста */
-.game-text::-webkit-scrollbar {
-    width: 8px;
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
-.game-text::-webkit-scrollbar-track {
-    background: #333;
+@keyframes popIn {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
 }
 
-.game-text::-webkit-scrollbar-thumb {
-    background: #666;
-    border-radius: 4px;
-}
-
-.game-text::-webkit-scrollbar-thumb:hover {
-    background: #888;
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
