@@ -3,68 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Питерский Мусорный Квест</title>
+    <title>Жизнь бомжа</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="game-container">
-        <h1>Питерский Мусорный Квест</h1>
-        <div id="output">Добро пожаловать в мусорные глубины Санкт-Петербурга! 🗑️🏙️
-Ваша цель — выжить в этом аду.</div>
-        <div id="status"></div>
-        <div id="actions">
-            <button onclick="game.action('искать')">Искать шмот</button>
-            <button onclick="showUseItemPrompt()">Использовать предмет</button>
-            <button onclick="showCombineItemsPrompt()">Скомбинировать предметы</button>
+    <div class="game-container">
+        <h1>Жизнь бомжа</h1>
+        <div class="status" id="status"></div>
+        <div class="output" id="output"></div>
+        <div class="quests">
+            <h3>Квесты:</h3>
+            <ul id="quest-list"></ul>
+        </div>
+        <div class="actions" id="actions">
+            <button onclick="game.action('искать')">Искать</button>
             <button onclick="game.action('уйти')">Уйти</button>
             <button onclick="game.action('позвать Даню')">Позвать Даню</button>
             <button onclick="game.action('уникальное действие')">Уникальное действие</button>
             <button onclick="game.action('поговорить с NPC')">Поговорить с NPC</button>
+            <button onclick="showUseItemPrompt()">Использовать предмет</button>
+            <button onclick="showCombineItemsPrompt()">Комбинировать предметы</button>
         </div>
-        <button id="restart-btn" onclick="game.restart()">Перезапустить</button>
-        <div id="danya-options">
-            <button onclick="game.danyaAction('поговорить')">Поговорить</button>
-            <button onclick="game.danyaAction('дать бухло')">Дать бухло</button>
-            <button onclick="game.danyaAction('уйти')">Уйти</button>
-        </div>
-        <div class="quest-log">
-            <h3>Квесты:</h3>
-            <ul id="quest-list"></ul>
-        </div>
-    </div>
+        <button class="restart-btn" id="restart-btn" onclick="game.restart()">Перезапустить</button>
 
-    <div id="location-prompt" class="modal">
-        <div class="modal-content animate">
+        <!-- Всплывающие окна -->
+        <div class="prompt" id="location-prompt">
             <h3>Куда пойти?</h3>
             <div id="location-options"></div>
             <button onclick="hideLocationPrompt()">Закрыть</button>
         </div>
-    </div>
-
-    <div id="item-prompt" class="modal">
-        <div class="modal-content animate">
+        <div class="prompt" id="item-prompt">
             <h3>Что использовать?</h3>
             <div id="item-options"></div>
             <button onclick="hideItemPrompt()">Закрыть</button>
         </div>
-    </div>
-
-    <div id="combine-prompt" class="modal">
-        <div class="modal-content animate">
-            <h3>Выбери два предмета для комбинации</h3>
+        <div class="prompt" id="combine-prompt">
+            <h3>Что комбинировать?</h3>
             <div id="combine-options"></div>
             <button onclick="hideCombinePrompt()">Закрыть</button>
         </div>
-    </div>
-
-    <div id="search-mini-game" class="modal">
-        <div class="modal-content animate">
+        <div class="prompt" id="search-mini-game">
             <h3>Угадай бак</h3>
             <button onclick="game.miniGameGuessContainer()">Угадать</button>
-            <button onclick="hideSearchMiniGame()">Закрыть</button>
+            <button onclick="hideSearchMiniGame()">Уйти</button>
+        </div>
+        <div class="prompt" id="danya-options">
+            <h3>Что делать с Даней?</h3>
+            <button onclick="game.danyaAction('поговорить')">Поговорить</button>
+            <button onclick="game.danyaAction('дать бухло')">Дать бухло</button>
+            <button onclick="game.danyaAction('уйти')">Уйти</button>
         </div>
     </div>
-
     <script src="game.js"></script>
 </body>
 </html>
