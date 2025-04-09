@@ -6,8 +6,8 @@
 }
 
 body {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-    color: #0ff;
+    background: linear-gradient(135deg, #2f1e0f 0%, #3c2a15 100%); /* Тёмно-коричневый градиент */
+    color: #d4a017; /* Грязно-жёлтый текст */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -15,21 +15,23 @@ body {
     padding: 20px;
     overflow-x: hidden;
     transition: background 0.5s;
+    background-image: url('https://www.transparenttextures.com/patterns/dirty-old-black-shirt.png'); /* Текстура грязи */
+    background-size: 200px;
 }
 
 /* Эффекты погоды и времени суток */
 body.rain {
-    background: linear-gradient(135deg, #0f0f1a 0%, #0a0f2e 100%);
+    background: linear-gradient(135deg, #1f140a 0%, #2a1c0f 100%);
     animation: rainEffect 0.5s infinite;
 }
 
 body.snow {
-    background: linear-gradient(135deg, #2e2e3e 0%, #1e2e4e 100%);
+    background: linear-gradient(135deg, #3c2a15 0%, #4a381d 100%);
     animation: snowEffect 2s infinite;
 }
 
 body.night {
-    background: linear-gradient(135deg, #0a0a1a 0%, #050a2e 100%);
+    background: linear-gradient(135deg, #1a0f07 0%, #25180c 100%);
 }
 
 @keyframes rainEffect {
@@ -43,54 +45,54 @@ body.night {
 }
 
 #game-container {
-    background: rgba(0, 0, 0, 0.8);
-    border: 2px solid #0ff;
+    background: rgba(34, 24, 12, 0.9); /* Тёмно-коричневый с прозрачностью */
+    border: 2px solid #8a5a2b; /* Грязно-коричневая рамка */
     border-radius: 10px;
     padding: 20px;
     max-width: 800px;
     width: 100%;
-    box-shadow: 0 0 20px #0ff, 0 0 40px #f0f;
-    animation: neonGlow 1.5s infinite alternate;
+    box-shadow: 0 0 20px #5a3c1e, 0 0 40px #3c2a15;
+    animation: dirtyGlow 1.5s infinite alternate;
 }
 
-@keyframes neonGlow {
+@keyframes dirtyGlow {
     from {
-        box-shadow: 0 0 10px #0ff, 0 0 20px #f0f;
+        box-shadow: 0 0 10px #5a3c1e, 0 0 20px #3c2a15;
     }
     to {
-        box-shadow: 0 0 20px #0ff, 0 0 40px #f0f;
+        box-shadow: 0 0 20px #5a3c1e, 0 0 40px #3c2a15;
     }
 }
 
 h1 {
     text-align: center;
-    color: #f0f;
-    text-shadow: 0 0 10px #f0f;
+    color: #b58900; /* Грязно-жёлтый заголовок */
+    text-shadow: 0 0 10px #5a3c1e;
     margin-bottom: 20px;
     font-size: 2rem;
 }
 
 #output {
-    background: #111;
-    border: 1px solid #0ff;
+    background: #1a0f07; /* Очень тёмный коричневый */
+    border: 1px solid #8a5a2b;
     padding: 15px;
     margin-bottom: 20px;
     height: 200px;
     overflow-y: auto;
-    color: #0ff;
-    text-shadow: 0 0 5px #0ff;
+    color: #d4a017;
+    text-shadow: 0 0 5px #5a3c1e;
     font-size: 1rem;
     line-height: 1.5;
     white-space: pre-wrap;
 }
 
 #status {
-    background: #222;
-    border: 1px solid #f0f;
+    background: #2f1e0f;
+    border: 1px solid #8a5a2b;
     padding: 10px;
     margin-bottom: 20px;
-    color: #f0f;
-    text-shadow: 0 0 5px #f0f;
+    color: #d4a017;
+    text-shadow: 0 0 5px #5a3c1e;
     font-size: 0.9rem;
     line-height: 1.4;
 }
@@ -104,32 +106,33 @@ h1 {
 }
 
 button {
-    background: #0ff;
-    color: #111;
+    background: #8a5a2b; /* Ржаво-коричневый */
+    color: #d4a017;
     border: none;
     padding: 10px 20px;
     font-size: 1rem;
     cursor: pointer;
     text-transform: uppercase;
     transition: all 0.3s;
-    box-shadow: 0 0 10px #0ff;
+    box-shadow: 0 0 10px #5a3c1e;
 }
 
 button:hover {
-    background: #f0f;
-    color: #000;
-    box-shadow: 0 0 20px #f0f;
+    background: #b58900; /* Грязно-жёлтый при наведении */
+    color: #1a0f07;
+    box-shadow: 0 0 20px #5a3c1e;
 }
 
 #restart-btn {
-    background: #f00;
-    color: #fff;
-    box-shadow: 0 0 10px #f00;
+    background: #a52a2a; /* Тёмно-красный для кнопки перезапуска */
+    color: #d4a017;
+    box-shadow: 0 0 10px #5a3c1e;
+    display: none; /* По умолчанию скрыта */
 }
 
 #restart-btn:hover {
-    background: #ff4040;
-    box-shadow: 0 0 20px #ff4040;
+    background: #c0392b;
+    box-shadow: 0 0 20px #5a3c1e;
 }
 
 #danya-options {
@@ -147,26 +150,26 @@ button:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(34, 24, 12, 0.9);
     z-index: 1000;
     justify-content: center;
     align-items: center;
 }
 
 .modal-content {
-    background: #111;
-    border: 2px solid #0ff;
+    background: #1a0f07;
+    border: 2px solid #8a5a2b;
     padding: 20px;
     border-radius: 10px;
     text-align: center;
-    box-shadow: 0 0 20px #0ff;
+    box-shadow: 0 0 20px #5a3c1e;
     max-width: 500px;
     width: 90%;
 }
 
 .modal-content h3 {
-    color: #f0f;
-    text-shadow: 0 0 5px #f0f;
+    color: #b58900;
+    text-shadow: 0 0 5px #5a3c1e;
     margin-bottom: 20px;
 }
 
@@ -194,16 +197,16 @@ button:hover {
 }
 
 .quest-log {
-    background: #222;
-    border: 1px solid #0ff;
+    background: #2f1e0f;
+    border: 1px solid #8a5a2b;
     padding: 10px;
-    color: #0ff;
-    text-shadow: 0 0 5px #0ff;
+    color: #d4a017;
+    text-shadow: 0 0 5px #5a3c1e;
 }
 
 .quest-log h3 {
-    color: #f0f;
-    text-shadow: 0 0 5px #f0f;
+    color: #b58900;
+    text-shadow: 0 0 5px #5a3c1e;
     margin-bottom: 10px;
 }
 
