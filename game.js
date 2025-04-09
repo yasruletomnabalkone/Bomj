@@ -1,7 +1,7 @@
 const game = {
     player: {
         health: 100,
-        strength: 5, // Новая стата для боёвки
+        strength: 5,
         inventory: [],
         reputation: 0,
         tugriks: 0,
@@ -46,7 +46,6 @@ const game = {
     currentLocation: null,
     output: document.getElementById("output"),
     danyaOptions: document.getElementById("danya-options"),
-    danyaActive: false,
 
     init() {
         this.loadGame();
@@ -80,12 +79,18 @@ const game = {
         const times = ["утро", "день", "вечер", "ночь"];
         if (Math.random() > 0.7) this.weather = weathers[Math.floor(Math.random() * weathers.length)];
         if (Math.random() > 0.5) this.timeOfDay = times[Math.floor(Math.random() * times.length)];
+        
+        document.body.className = ""; // Сбрасываем классы
+        if (this.weather === "дождь") document.body.classList.add("rain");
+        if (this.weather === "снег") document.body.classList.add("snow");
+        if (this.timeOfDay === "ночь") document.body.classList.add("night");
+
         if (this.weather === "дождь" && !this.player.inventory.includes("старая куртка")) {
             this.player.health -= 5;
-            this.output.innerText += "\nДождь промочил тебя до костей. -5 HP";
+            addOutput("Дождь промочил тебя до костей. -5 HP");
         }
         if (this.timeOfDay === "ночь") {
-            this.output.innerText += "\nНочь. Шмотки найти сложнее, но тугрики в тайниках.";
+            addOutput("Ночь. Шмотки найти сложнее, но тугрики в тайниках.");
         }
     },
 
@@ -93,11 +98,18 @@ const game = {
         let status = `♥ Здоровье: ${this.player.health} | 💪 Сила: ${this.player.strength} | 🎭 Репутация: ${this.player.reputation} | 💰 Тугрики: ${this.player.tugriks}\n`;
         status += `🎒 Инвентарь: ${this.player.inventory.length > 0 ? this.player.inventory.join(", ") : "пусто"}\n`;
         status += `🌦 Погода: ${this.weather} | 🕒 Время: ${this.timeOfDay}\n`;
-        if (Object.keys(this.player.quests).length > 0) status += `📜 Квесты: ${Object.keys(this.player.quests).join(", ")}\n`;
         if (this.player.is_addicted) status += "💉 Ты зависим от фентанила!\n";
         if (this.player.has_hiv) status += "🩺 У тебя ВИЧ!\n";
         if (this.player.is_drunk) status += "🍺 Ты пьяный!\n";
         document.getElementById("status").innerText = status;
+
+        const questList = document.getElementById("quest-list");
+        questList.innerHTML = "";
+        for (let quest in this.player.quests) {
+            const li = document.createElement("li");
+            li.innerText = `${quest}: ${this.player.quests[quest].description}`;
+            questList.appendChild(li);
+        }
     },
 
     updateGame() {
@@ -153,7 +165,7 @@ const game = {
             this.player.addictionTimer = setInterval(() => {
                 if (!this.player.inventory.includes("доза фентанила")) {
                     this.player.health -= 5;
-                    this.output.innerText += "\nЛомка бьёт... -5 HP";
+                    addOutput("Ломка бьёт... -5 HP");
                     this.updateGame();
                 }
             }, 10000);
@@ -175,7 +187,7 @@ const game = {
         } else {
             text = "Это не комбинируется, дебил.";
         }
-        this.output.innerText += "\n" + text;
+        addOutput(text);
         this.updateGame();
     },
 
@@ -203,12 +215,13 @@ const game = {
     },
 
     miniGameGuessContainer() {
-        let text = "\nТри бака перед тобой. В одном — шмотка. Угадай (1, 2, 3): ";
-        this.output.innerText += text;
+        let text = "Три бака перед тобой. В одном — шмотка.";
+        addOutput(text);
         let choice = prompt("Выбери бак (1, 2 или 3):");
         if (!choice || isNaN(choice) || choice < 1 || choice > 3) {
-            this.output.innerText += "\nТы чё, дебил? Урон -5 HP за тупость.";
+            addOutput("Ты чё, дебил? Урон -5 HP за тупость.");
             this.player.health -= 5;
+            hideSearchMiniGame();
             this.updateGame();
             return;
         }
@@ -218,30 +231,31 @@ const game = {
             let foundItem = this.currentLocation.items[Math.floor(Math.random() * this.currentLocation.items.length)];
             if (foundItem === "10 тугриков") {
                 this.player.tugriks += 10;
-                this.output.innerText += "\nУгадал! Нашёл 10 тугриков.";
+                addOutput("Угадал! Нашёл 10 тугриков.");
             } else {
                 this.player.inventory.push(foundItem);
-                this.output.innerText += `\nУгадал! Нашёл: ${foundItem}.`;
+                addOutput(`Угадал! Нашёл: ${foundItem}.`);
             }
             this.checkQuestCompletion(foundItem);
         } else {
             let damage = Math.floor(Math.random() * 10) + 5;
             this.player.health -= damage;
-            this.output.innerText += `\nПусто! Пока копался, пьяный бомж пнул тебя. -${damage} HP`;
+            addOutput(`Пусто! Пока копался, пьяный бомж пнул тебя. -${damage} HP`);
         }
+        hideSearchMiniGame();
         this.updateGame();
     },
 
     miniGameRiddle() {
-        let text = "\nГопник: 'Э, петух, докажи, что не лох! Отгадай:'";
+        let text = "Гопник: 'Э, петух, докажи, что не лох! Отгадай:'";
         let riddle = this.riddles[Math.floor(Math.random() * this.riddles.length)];
         text += `\n${riddle.question}`;
         riddle.options.forEach((opt, i) => text += `\n${i + 1}. ${opt}`);
-        this.output.innerText += text;
+        addOutput(text);
 
         let choice = prompt("Выбери ответ (1-4):");
         if (!choice || isNaN(choice) || choice < 1 || choice > 4) {
-            this.output.innerText += "\nТы чё, дебил? Урон -5 HP за тупость.";
+            addOutput("Ты чё, дебил? Урон -5 HP за тупость.");
             this.player.health -= 5;
             this.updateGame();
             return;
@@ -250,38 +264,38 @@ const game = {
         if (parseInt(choice) - 1 === riddle.correct) {
             let reward = Math.floor(Math.random() * 20) + 10;
             this.player.tugriks += reward;
-            this.output.innerText += `\nГопник: 'Молодец, петух! Вот тебе ${reward} тугриков.'`;
+            addOutput(`Гопник: 'Молодец, петух! Вот тебе ${reward} тугриков.'`);
         } else {
             let damage = Math.floor(Math.random() * 10) + 5;
             this.player.health -= damage;
-            this.output.innerText += `\nГопник: 'Лох ты!' *бьёт в рыло* -${damage} HP`;
+            addOutput(`Гопник: 'Лох ты!' *бьёт в рыло* -${damage} HP`);
         }
         this.updateGame();
     },
 
     tradeOpportunity() {
         let discount = this.player.reputation > 50 ? 10 : 0;
-        let text = `\nБарыга: 'Есть ${this.player.tugriks} тугриков? Бери шмот!'\n`;
+        let text = `Барыга: 'Есть ${this.player.tugriks} тугриков? Бери шмот!'\n`;
         text += `1 — Балтика (${50 - discount} тугриков), 2 — Доза (${70 - discount} тугриков), 3 — Мобильник (${100 - discount} тугриков), 4 — Отказаться`;
-        this.output.innerText += text;
+        addOutput(text);
         let choice = prompt("Что берёшь? (1, 2, 3, 4):");
 
         if (choice === "1" && this.player.tugriks >= (50 - discount)) {
             this.player.tugriks -= (50 - discount);
             this.player.inventory.push("полная бутылка 'Балтики'");
-            this.output.innerText += `\nКупил 'Балтику' за ${50 - discount} тугриков!`;
+            addOutput(`Купил 'Балтику' за ${50 - discount} тугриков!`);
         } else if (choice === "2" && this.player.tugriks >= (70 - discount)) {
             this.player.tugriks -= (70 - discount);
             this.player.inventory.push("доза фентанила");
-            this.output.innerText += `\nКупил дозу за ${70 - discount} тугриков!`;
+            addOutput(`Купил дозу за ${70 - discount} тугриков!`);
         } else if (choice === "3" && this.player.tugriks >= (100 - discount)) {
             this.player.tugriks -= (100 - discount);
             this.player.inventory.push("мобильник без симки");
-            this.output.innerText += `\nКупил мобильник за ${100 - discount} тугриков!`;
+            addOutput(`Купил мобильник за ${100 - discount} тугриков!`);
         } else if (choice === "4") {
-            this.output.innerText += "\nБарыга плюнул тебе под ноги и ушёл.";
+            addOutput("Барыга плюнул тебе под ноги и ушёл.");
         } else {
-            this.output.innerText += "\n'Чё бормочешь?' — барыга уходит.";
+            addOutput("'Чё бормочешь?' — барыга уходит.");
         }
         this.updateGame();
     },
@@ -290,29 +304,27 @@ const game = {
         const events = [
             () => {
                 this.player.tugriks += 50;
-                return "\nНашёл кошелёк на мусорке! +50 тугриков.";
+                return "Нашёл кошелёк на мусорке! +50 тугриков.";
             },
             () => {
                 let loss = Math.floor(this.player.tugriks / 2);
                 this.player.tugriks -= loss;
-                return `\nПока спал, воры спиздили ${loss} тугриков!`;
+                return `Пока спал, воры спиздили ${loss} тугриков!`;
             },
             () => {
                 if (this.player.inventory.includes("доза фентанила")) {
                     this.player.inventory.splice(this.player.inventory.indexOf("доза фентанила"), 1);
-                    return "\nМенты шмонают район! Дозу спалили, конфисковали.";
+                    return "Менты шмонают район! Дозу спалили, конфисковали.";
                 }
-                return "\nМенты шмонают район, но у тебя ничего нет.";
+                return "Менты шмонают район, но у тебя ничего нет.";
             }
         ];
         let event = events[Math.floor(Math.random() * events.length)];
-        this.output.innerText += event();
+        addOutput(event());
         this.updateGame();
     },
 
     action(command) {
-        if (this.danyaActive) return;
-
         let text = "";
         let reputationMod = this.player.reputation < 0 ? 2 : 0;
 
@@ -321,42 +333,37 @@ const game = {
             if (Math.random() > 0.7) {
                 this.miniGameRiddle();
             } else if (dangerRoll > this.currentLocation.danger_level + reputationMod) {
-                this.miniGameGuessContainer();
+                document.getElementById("search-mini-game").style.display = "flex";
             } else {
                 let attacker = this.currentLocation.name === "Заброшенная квартира" ? "наркоманы" : ["крысы", "скинхеды", "пьяный дворник"][Math.floor(Math.random() * 3)];
                 text += this.fight(attacker);
-                this.output.innerText += "\n" + text;
+                addOutput(text);
                 this.updateGame();
             }
         } else if (command === "уйти") {
-            this.currentLocation = this.locations[Math.floor(Math.random() * this.locations.length)];
-            text += "Ты свалил к другой мусорке...";
-            this.updateWeatherAndTime();
-            this.output.innerText += "\n" + text;
-            this.updateGame();
+            showLocationPrompt();
         } else if (command === "позвать Даню") {
             let danyaChance = this.player.reputation > 50 ? 0.9 : 0.7;
             if (Math.random() < danyaChance) {
-                this.danyaActive = true;
-                text += "\nДаня вылез: 'О, кент! Дашь на опохмел?'";
-                this.danyaOptions.style.display = "block";
+                this.danyaOptions.style.display = "flex";
+                text += "Даня вылез: 'О, кент! Дашь на опохмел?'";
             } else {
-                text += "\nДаня где-то нажрался и спит.";
+                text += "Даня где-то нажрался и спит.";
             }
-            this.output.innerText += "\n" + text;
+            addOutput(text);
             this.updateGame();
         } else if (command === "уникальное действие") {
             text += this.uniqueLocationAction();
-            this.output.innerText += "\n" + text;
+            addOutput(text);
             this.updateGame();
         } else if (command === "поговорить с NPC") {
             let npc = this.npcs.find(n => n.location === this.currentLocation.name);
             if (npc && npc.quest) {
                 text += this.npcInteraction(npc);
             } else {
-                text += "\nТут никого нет, кроме крыс.";
+                text += "Тут никого нет, кроме крыс.";
             }
-            this.output.innerText += "\n" + text;
+            addOutput(text);
             this.updateGame();
         }
     },
@@ -416,17 +423,18 @@ const game = {
     npcInteraction(npc) {
         if (npc.name === "Бабка с клюкой" && npc.quest && !(npc.quest in this.player.quests)) {
             this.player.quests[npc.quest] = { description: "Бабка хочет суп.", reward: npc.reward };
-            return "\nБабка: 'Принеси суп, алкаш, дам 20 тугриков!'";
+            return "Бабка: 'Принеси суп, алкаш, дам 20 тугриков!'";
         } else if (npc.name === "Скинхед Петя" && npc.quest && !(npc.quest in this.player.quests)) {
             this.player.quests[npc.quest] = { description: "Петя хочет 'Жигулёвское'.", reward: npc.reward };
-            return "\nПетя: 'Го пивка, братан, буду твой кореш!'";
+            return "Петя: 'Го пивка, братан, буду твой кореш!'";
         }
-        return `\n${npc.name}: 'Чё надо? Вали!'`;
+        return `${npc.name}: 'Чё надо? Вали!'`;
     },
 
     useItem(item) {
         if (!this.player.inventory.includes(item)) {
-            this.output.innerText += "\nУ тебя нет этого.";
+            addOutput(`У тебя нет ${item}.`);
+            hideItemPrompt();
             return;
         }
 
@@ -441,7 +449,7 @@ const game = {
                 this.player.health -= 15;
                 this.player.reputation -= 20;
                 this.player.is_drunk = false;
-                this.output.innerText += "\nПроснулся в луже мочи. -15 HP, -20 репутации";
+                addOutput("Проснулся в луже мочи. -15 HP, -20 репутации");
                 this.updateGame();
             }, 5000);
         } else if (item === "доширак") {
@@ -497,13 +505,15 @@ const game = {
             text = "Сдал бензин скинхедам. +30 тугриков!";
         } else {
             text = "Не сюда и не так.";
-            this.output.innerText += "\n" + text;
+            addOutput(text);
+            hideItemPrompt();
             return;
         }
 
         this.player.inventory.splice(this.player.inventory.indexOf(item), 1);
-        this.output.innerText += "\n" + text;
+        addOutput(text);
         this.checkQuestCompletion(item);
+        hideItemPrompt();
         this.updateGame();
     },
 
@@ -517,7 +527,7 @@ const game = {
 
         if (action === "поговорить") {
             if (Object.keys(this.player.quests).length === 0) {
-                text += "\nДаня: 'Есть дело, братан...'";
+                text += "Даня: 'Есть дело, братан...'";
                 for (let quest in danyaQuests) {
                     text += `\n- '${quest}': ${danyaQuests[quest].description}`;
                 }
@@ -529,23 +539,22 @@ const game = {
                     text += "\n'Ты чё, больной?' — Даня уходит.";
                 }
             } else {
-                text += "\nДаня: 'Делай, что взял уже!'";
+                text += "Даня: 'Делай, что взял уже!'";
             }
         } else if (action === "дать бухло") {
             if (this.player.inventory.includes("полупустая бутылка 'Балтики'")) {
                 this.player.inventory.splice(this.player.inventory.indexOf("полупустая бутылка 'Балтики'"), 1);
                 this.player.reputation += 30;
-                text += "\nДаня глушит 'Балтику': 'В рехабе я...' *блюёт*";
+                text += "Даня глушит 'Балтику': 'В рехабе я...' *блюёт*";
             } else {
-                text += "\n'Где бухло, сука?' — Даня злится.";
+                text += "'Где бухло, сука?' — Даня злится.";
             }
         } else if (action === "уйти") {
-            text += "\nДаня свалил.";
+            text += "Даня свалил.";
+            this.danyaOptions.style.display = "none";
         }
 
-        this.danyaActive = false;
-        this.danyaOptions.style.display = "none";
-        this.output.innerText += text;
+        addOutput(text);
         this.updateGame();
     },
 
@@ -571,26 +580,98 @@ const game = {
         };
         let reward = this.player.quests[quest].reward;
         if (typeof reward === "string") {
-            this.output.innerText += `\nДаня рассказывает: ${stories[reward]}`;
+            addOutput(`Даня рассказывает: ${stories[reward]}`);
             this.player.reputation += 50;
         } else {
             Object.assign(this.player, reward);
-            this.output.innerText += `\nКвест выполнен! Получено: ${Object.entries(reward).map(([k, v]) => `${k}: ${v}`).join(", ")}`;
+            addOutput(`Квест выполнен! Получено: ${Object.entries(reward).map(([k, v]) => `${k}: ${v}`).join(", ")}`);
         }
         delete this.player.quests[quest];
+        this.updateGame();
+    },
+
+    goTo(locationName) {
+        this.currentLocation = this.locations.find(loc => loc.name === locationName);
+        addOutput(`Вы пошли в ${locationName}.`);
+        this.updateWeatherAndTime();
+        hideLocationPrompt();
         this.updateGame();
     }
 };
 
+function addOutput(text) {
+    const output = document.getElementById('output');
+    output.innerText += `\n${text}`;
+    output.scrollTop = output.scrollHeight;
+}
+
+function showLocationPrompt() {
+    const options = game.locations;
+    const container = document.getElementById("location-options");
+    container.innerHTML = '';
+    options.forEach(loc => {
+        const btn = document.createElement("button");
+        btn.innerText = loc.name;
+        btn.onclick = () => game.goTo(loc.name);
+        container.appendChild(btn);
+    });
+    document.getElementById("location-prompt").style.display = "flex";
+}
+
+function hideLocationPrompt() {
+    document.getElementById("location-prompt").style.display = "none";
+}
+
 function showUseItemPrompt() {
-    let item = prompt("Что юзнуть?").toLowerCase();
-    game.useItem(item);
+    const usableItems = game.player.inventory;
+    const container = document.getElementById("item-options");
+    container.innerHTML = '';
+    usableItems.forEach(item => {
+        const btn = document.createElement("button");
+        btn.innerText = item;
+        btn.onclick = () => game.useItem(item);
+        container.appendChild(btn);
+    });
+    document.getElementById("item-prompt").style.display = "flex";
+}
+
+function hideItemPrompt() {
+    document.getElementById("item-prompt").style.display = "none";
 }
 
 function showCombineItemsPrompt() {
-    let item1 = prompt("Первый предмет:").toLowerCase();
-    let item2 = prompt("Второй предмет:").toLowerCase();
-    game.combineItems(item1, item2);
+    const items = game.player.inventory;
+    const container = document.getElementById("combine-options");
+    container.innerHTML = '';
+    if (items.length < 2) {
+        addOutput("Нужно минимум 2 предмета для комбинации!");
+        return;
+    }
+    let selected = [];
+    items.forEach(item => {
+        const btn = document.createElement("button");
+        btn.innerText = item;
+        btn.onclick = () => {
+            if (!selected.includes(item)) {
+                selected.push(item);
+                btn.style.backgroundColor = "#0ff";
+                if (selected.length === 2) {
+                    game.combineItems(selected[0], selected[1]);
+                    hideCombinePrompt();
+                }
+            }
+        };
+        container.appendChild(btn);
+    });
+    document.getElementById("combine-prompt").style.display = "flex";
+}
+
+function hideCombinePrompt() {
+    document.getElementById("combine-prompt").style.display = "none";
+}
+
+function hideSearchMiniGame() {
+    document.getElementById("search-mini-game").style.display = "none";
 }
 
 game.init();
